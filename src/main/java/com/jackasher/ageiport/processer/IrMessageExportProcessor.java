@@ -218,7 +218,7 @@ public class IrMessageExportProcessor implements ExportProcessor<IrMessageQuery,
         //将配置中央化管理
         Integer maxTotalCount = getResolvedParams(irMessageQuery).getTotalCount();
 
-        System.out.println("effectiveExportConfig" + getResolvedParams(irMessageQuery) + "||maxTotalCount" + maxTotalCount);
+        System.out.println("effectiveExportConfig" + getResolvedParams(irMessageQuery) + "|| maxTotalCount:" + maxTotalCount);
 
 
         int pageSize = bizExportPage.getSize();
@@ -280,7 +280,7 @@ public class IrMessageExportProcessor implements ExportProcessor<IrMessageQuery,
         Boolean isProcessAttachments = irMessageQuery.getExportParams().getProcessAttachments();
         if (isProcessAttachments != null && isProcessAttachments) {
             try {
-                AttachmentProcessingService attachmentService = SpringContextUtil.getBean(AttachmentProcessingService.class);
+                AttachmentProcessingService attachmentService = SpringContextUtil.getBean("attachmentProcessingServiceImpl",AttachmentProcessingService.class);
                 
                 // 使用异步处理附件，避免阻塞主流程
                 attachmentService.processAndPackageAttachmentsAsync(irMessageDataList, subTaskId, subTaskNo, irMessageQuery)

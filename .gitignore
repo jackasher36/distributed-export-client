@@ -59,8 +59,12 @@ minio-config.json
 Thumbs.db
 
 
+
+
 ### Demo 文件 ###
 # Demo 示例代码和文件
 src/main/java/com/jackasher/ageiport/demo/
 
 src/main/java/com/jackasher/ageiport/service/attachment_service/AttachmentProcessingServiceImpl.java
+
+.idea/
