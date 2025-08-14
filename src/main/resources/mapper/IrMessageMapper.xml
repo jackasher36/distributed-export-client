@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jackasher.ageiport.mapper.IrMessageMapper">
+
+    <resultMap id="BaseResultMap" type="com.jackasher.ageiport.model.pojo.IrMessage">
+            <id property="uuid" column="uuid" jdbcType="VARCHAR"/>
+            <result property="createdTime" column="created_time" jdbcType="TIMESTAMP"/>
+            <result property="deviceType" column="device_type" jdbcType="VARCHAR"/>
+            <result property="deviceNumber" column="device_number" jdbcType="VARCHAR"/>
+            <result property="archiveName" column="archive_name" jdbcType="VARCHAR"/>
+            <result property="bucketName" column="bucket_name" jdbcType="VARCHAR"/>
+            <result property="areaNumber" column="area_number" jdbcType="VARCHAR"/>
+            <result property="areaName" column="area_name" jdbcType="VARCHAR"/>
+            <result property="fileName" column="file_name" jdbcType="VARCHAR"/>
+            <result property="fileLength" column="file_length" jdbcType="INTEGER"/>
+            <result property="diePickingFileName" column="die_picking_file_name" jdbcType="VARCHAR"/>
+            <result property="ddcFileName" column="ddc_file_name" jdbcType="VARCHAR"/>
+            <result property="demodulationFileName" column="demodulation_file_name" jdbcType="VARCHAR"/>
+            <result property="decodeFileName" column="decode_file_name" jdbcType="VARCHAR"/>
+            <result property="beforeDecodeFileName" column="before_decode_file_name" jdbcType="VARCHAR"/>
+            <result property="obtUlFileName" column="obt_ul_file_name" jdbcType="VARCHAR"/>
+            <result property="obtDlFileName" column="obt_dl_file_name" jdbcType="VARCHAR"/>
+            <result property="dataSourceType" column="data_source_type" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        uuid,created_time,device_type,
+        device_number,archive_name,bucket_name,
+        area_number,area_name,file_name,
+        file_length,die_picking_file_name,ddc_file_name,
+        demodulation_file_name,decode_file_name,before_decode_file_name,
+        obt_ul_file_name,obt_dl_file_name,data_source_type
+    </sql>
+</mapper>

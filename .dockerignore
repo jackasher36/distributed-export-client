@@ -1,0 +1,183 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### 敏感数据保护 - 配置文件 ###
+# 生产环境配置文件（包含真实的数据库密码、API密钥等）
+src/main/resources/application-prod.yml
+src/main/resources/application-production.yml
+
+# 开发环境配置文件（包含本地数据库密码、MinIO密钥等）
+src/main/resources/application-dev.yml
+src/main/resources/application-development.yml
+
+# Docker环境配置文件（包含容器环境敏感信息）
+src/main/resources/application-docker.yml
+
+# 私有配置文件
+src/main/resources/application-local.yml
+src/main/resources/application-private.yml
+src/main/resources/application-secret.yml
+
+# 数据库配置
+src/main/resources/database.yml
+src/main/resources/database.properties
+src/main/resources/db-config.properties
+
+### 环境变量文件 ###
+.env
+.env.local
+.env.production
+.env.development
+.env.docker
+*.env
+
+### Docker 敏感配置 ###
+# Docker Compose 文件（包含环境变量和密码）
+docker-compose.yml
+docker-compose.*.yml
+docker-compose-*.yml
+
+# Docker 环境文件
+.dockerenv
+docker.env
+
+### 密钥和证书文件 ###
+# 私钥文件
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+*.truststore
+
+# SSL证书
+*.crt
+*.cer
+*.der
+
+# SSH密钥
+id_rsa
+id_rsa.pub
+*.ppk
+
+### 云服务配置 ###
+# 阿里云配置
+.aliyun/
+aliyun-config.json
+
+# AWS配置
+.aws/
+credentials
+
+# MinIO配置
+.minio/
+minio-config.json
+
+### 日志文件（可能包含敏感信息）###
+logs/
+*.log
+*.log.*
+*.out
+
+### 临时文件和缓存 ###
+# 临时文件
+tmp/
+temp/
+*.tmp
+*.temp
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+### 备份和导出文件 ###
+# 数据库备份
+*.sql
+*.dump
+*.backup
+
+# 导出文件
+export/
+exports/
+*.csv
+*.xlsx
+*.xls
+
+### 特定敏感配置模式 ###
+# 任何包含password、secret、key的配置文件
+*password*
+*secret*
+*private*
+*credential*
+
+# 配置文件备份
+*.yml.bak
+*.properties.bak
+*.xml.bak
+
+### 扩展性考虑 ###
+# 微服务配置中心配置
+nacos-config/
+consul-config/
+etcd-config/
+
+# 监控和运维工具配置
+prometheus-config/
+grafana-config/
+*.monitoring
+
+# 第三方服务配置
+oauth-config/
+payment-config/
+sms-config/
+
+# 测试环境敏感数据
+test-data/
+mock-data/
+*.test.yml
+*.test.properties
+
+### 编译和构建产物中的敏感信息 ###
+# 可能包含配置信息的JAR包
+*-with-dependencies.jar
+*-fat.jar
+
+# 运行时生成的配置
+runtime-config/
+generated-config/
+
+### Demo 文件（测试和演示代码）###
+# demo 目录下的所有文件
+src/main/java/com/jackasher/ageiport/demo/
+demo/

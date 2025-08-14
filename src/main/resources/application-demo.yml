@@ -1,0 +1,68 @@
+server:
+  port: 8775
+
+spring:
+  application:
+    name: ageiport
+  datasource:
+    url: jdbc:mysql://your_mysql_host:3306/your_database_name?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: your_mysql_username
+    password: your_mysql_password
+  cloud:
+    nacos:
+      # Nacos Server地址
+      server-addr: your_nacos_host:8848
+      config:
+        # 配置文件后缀
+        file-extension: yml
+        # 共享配置，可以放一些公共配置
+        shared-configs:
+          - data-id: common.yml
+            refresh: true
+        # 多个profile的配置
+        # import-check:
+        #   enabled: false
+    # Spring Boot 2.4+ 推荐使用 `spring.config.import`
+  config:
+    import:
+      - optional:nacos:${spring.application.name}.yml
+
+
+ageiport:
+  # 文件存储配置 - 支持动态选择存储类型
+  file-store:
+    # 存储类型：minio 或 oss
+    type: oss
+    # MinIO配置（当type为minio时使用）
+    minio:
+      endpoint: http://your_minio_host:9000
+      bucket-name: your_minio_bucket_name
+      access-key: your_minio_access_key
+      secret-key: your_minio_secret_key
+    # 阿里云OSS配置（当type为oss时使用）
+    oss:
+      endpoint: https://your_oss_endpoint
+      bucket-name: your_oss_bucket_name
+      access-key-id: your_oss_access_key_id
+      access-key-secret: your_oss_access_key_secret
+
+  # ageiPort server的地址
+  taskServerClientOptions:
+    port: 9821
+    endpoint: your_ageiport_task_server_host
+
+# 应用程序线程池配置
+app:
+  thread-pool:
+    # 附件处理线程池配置
+    attachment:
+      # 核心线程数，建议根据服务器配置调整
+      core-pool-size: 4
+      # 最大线程数，建议不超过CPU核心数的2倍
+      max-pool-size: 8
+      # 队列容量，可根据业务需求调整
+      queue-capacity: 200
+      # 线程空闲时间（秒）
+      keep-alive-seconds: 60
+      # 线程名前缀
+      thread-name-prefix: "attachment-executor-"

@@ -1,0 +1,66 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### VS Code ###
+.vscode/
+
+### 敏感数据保护 - 配置文件 ###
+# 生产环境配置文件（包含真实的数据库密码、API密钥等）
+src/main/resources/application-prod.yml
+src/main/resources/application-production.yml
+
+# 开发环境配置文件（包含本地数据库密码、MinIO密钥等）
+src/main/resources/application-dev.yml
+src/main/resources/application-development.yml
+
+# Docker环境配置文件（包含容器环境敏感信息）
+src/main/resources/application-docker.yml
+
+# 私有配置文件
+src/main/resources/application-local.yml
+src/main/resources/application-private.yml
+src/main/resources/application-secret.yml
+
+# 数据库配置
+src/main/resources/database.yml
+src/main/resources/database.properties
+src/main/resources/db-config.properties
+
+
+### Docker 敏感配置 ###
+# Docker Compose 文件（包含环境变量和密码）
+docker-compose.yml
+docker-compose.*.yml
+docker-compose-*.yml
+
+# Docker 环境文件
+.dockerenv
+docker.env
+
+### 云服务配置 ###
+# 阿里云配置
+.aliyun/
+aliyun-config.json
+
+.minio/
+minio-config.json
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+
+### Demo 文件 ###
+# Demo 示例代码和文件
+src/main/java/com/jackasher/ageiport/demo/
+
+src/main/java/com/jackasher/ageiport/service/attachment_service/AttachmentProcessingServiceImpl.java

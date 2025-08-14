@@ -1,0 +1,1 @@
+MinioFileStore=com.jackasher.ageiport.minio.MinioFileStoreFactory
