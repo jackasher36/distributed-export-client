@@ -48,24 +48,24 @@ public class ConfigMerger {
                             defaultValue = defaultField.get(defaultProps);
                         }
 
-                        System.out.println("【ConfigMerger处理】字段: " + apiField.getName() + 
-                                         ", 默认值: " + defaultValue + 
-                                         " (类型: " + (defaultValue != null ? defaultValue.getClass().getSimpleName() : "null") + ")");
+//                        System.out.println("【ConfigMerger处理】字段: " + apiField.getName() +
+//                                         ", 默认值: " + defaultValue +
+//                                         " (类型: " + (defaultValue != null ? defaultValue.getClass().getSimpleName() : "null") + ")");
 
                         // 将默认值设置到API对象的字段中
                         apiField.set(apiParams, defaultValue);
                         
                         // 验证设置是否成功
                         Object newValue = apiField.get(apiParams);
-                        System.out.println("【ConfigMerger验证】字段: " + apiField.getName() + 
-                                         " 设置后的值: " + newValue);
+//                        System.out.println("【ConfigMerger验证】字段: " + apiField.getName() +
+//                                         " 设置后的值: " + newValue);
                     } else {
                         System.out.println("【ConfigMerger跳过】字段: " + apiField.getName() + 
                                          " - 在默认配置中未找到对应字段");
                     }
                 } else {
-                    System.out.println("【ConfigMerger跳过】字段: " + apiField.getName() + 
-                                     " - API值非null: " + apiValue);
+//                    System.out.println("【ConfigMerger跳过】字段: " + apiField.getName() +
+//                                     " - API值非null: " + apiValue);
                 }
             } catch (IllegalAccessException e) {
                 // 在实际项目中，这里应该有更健壮的日志和异常处理

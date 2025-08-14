@@ -19,7 +19,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * @since 1.0
  */
 @Configuration
-@ConfigurationProperties(prefix = "app.thread-pool.attachment")
+@ConfigurationProperties(prefix = "ageiport.thread-pool.attachment")
 @Data
 public class ThreadPoolConfig {
 

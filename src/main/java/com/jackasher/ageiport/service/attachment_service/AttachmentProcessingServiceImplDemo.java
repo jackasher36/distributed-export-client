@@ -1,5 +1,7 @@
 package com.jackasher.ageiport.service.attachment_service;
 
+import com.jackasher.ageiport.demo.DownloadFileParamDemo;
+import com.jackasher.ageiport.model.export.ExportParams;
 import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import io.minio.MinioClient;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import static com.jackasher.ageiport.utils.IrMessageUtils.getResolvedParams;
 
@@ -48,6 +51,7 @@ public class AttachmentProcessingServiceImplDemo implements AttachmentProcessing
             if (processAttachments) {
                 // TODO 你的真实业务处理逻辑
                 log.info("开始处理附件...");
+
                 //模拟事件处理中
                 Thread.sleep(15000);
             } else {
