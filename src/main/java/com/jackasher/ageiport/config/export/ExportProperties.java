@@ -87,7 +87,10 @@ public class ExportProperties {
      */
     private String excelFileName = "default";
 
-
+    /**
+     * 附件处理模式：SYNC/ASYNC/DEFERRED/NONE
+     */
+    private String attachmentProcessMode = "ASYNC";
 
 
     /**

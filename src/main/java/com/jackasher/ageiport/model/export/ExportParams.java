@@ -68,6 +68,11 @@ public class ExportParams {
     private Boolean processAttachments;
 
     /**
+     * 附件处理模式：SYNC/ASYNC/DEFERRED/NONE
+     */
+    private String attachmentProcessMode;
+
+    /**
      * excel文件保存目录
      */
     private String excelFileDirectory = System.getProperty("user.home");

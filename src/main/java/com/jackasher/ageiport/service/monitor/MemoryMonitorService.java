@@ -41,7 +41,7 @@ public class MemoryMonitorService {
     /**
      * 定时任务：每30秒执行一次内存分析
      */
-    @Scheduled(fixedRate = 10000) // 30秒执行一次
+    @Scheduled(fixedRate = 10000) // 10秒执行一次
     public void analyzeMemoryUsage() {
         try {
             MemoryAnalysisResult result = getCurrentMemoryInfo();

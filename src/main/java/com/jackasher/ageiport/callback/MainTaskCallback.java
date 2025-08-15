@@ -1,6 +1,12 @@
 // src/main/java/com/jackasher/ageiport/callback/MainTaskCallback.java
 package com.jackasher.ageiport.callback;
 
+import java.util.HashMap;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
 import com.alibaba.ageiport.common.feature.FeatureUtils;
 import com.alibaba.ageiport.common.logger.Logger;
 import com.alibaba.ageiport.common.logger.LoggerFactory;
@@ -13,11 +19,8 @@ import com.jackasher.ageiport.constant.MainTaskCallbackConstant;
 import com.jackasher.ageiport.service.callback_service.AlertService;
 import com.jackasher.ageiport.service.callback_service.BusinessTaskService;
 import com.jackasher.ageiport.service.callback_service.WebSocketService;
+import com.jackasher.ageiport.utils.AttachmentProcessUtil;
 import com.jackasher.ageiport.utils.SpringContextUtil;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.util.HashMap;
 
 /**
  * 任务回调钩子,全局只执行一次。
@@ -67,6 +70,9 @@ public class MainTaskCallback implements com.alibaba.ageiport.processor.core.spi
     public void afterFinished(MainTask mainTask) {
         logger.info("--- [CALLBACK] 任务成功完成 afterFinished: {}", mainTask.getMainTaskId());
         try {
+            // 触发延迟处理的附件任务
+//            AttachmentProcessUtil.triggerDeferredTasks(mainTask.getMainTaskId());
+            
             String feature = mainTask.getFeature();
             String outputFileKey = FeatureUtils.getFeature(feature, MainTaskFeatureKeys.OUTPUT_FILE_KEY);
 
@@ -118,12 +124,11 @@ public class MainTaskCallback implements com.alibaba.ageiport.processor.core.spi
                 logger.info("任务 {} 共有 {} 个子任务，开始逐一清理其中间文件...", mainTask.getMainTaskId(), subTotalCount);
                 for (int i = 1; i <= subTotalCount; i++) {
                     String subTaskId = TaskIdUtil.genSubTaskId(mainTask.getMainTaskId(), i);
-                    String objectName = subTaskId;
                     try {
-                        fileStore.remove(objectName, new HashMap<>());
-                        logger.debug("成功删除中间文件: {}", objectName);
+                        fileStore.remove(subTaskId, new HashMap<>());
+                        logger.debug("成功删除中间文件: {}", subTaskId);
                     } catch (Exception e) {
-                        logger.warn("尝试删除中间文件 {} 时出现异常（可能是文件不存在），不影响流程: {}", objectName, e.getMessage());
+                        logger.warn("尝试删除中间文件 {} 时出现异常（可能是文件不存在），不影响流程: {}", subTaskId, e.getMessage());
                     }
                 }
                 logger.info("任务 {} 的子任务中间文件清理完成。", mainTask.getMainTaskId());

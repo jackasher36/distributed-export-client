@@ -23,6 +23,7 @@ import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import com.jackasher.ageiport.model.ir_message.IrMessageView;
 import com.jackasher.ageiport.service.attachment_service.AttachmentProcessingService;
+import com.jackasher.ageiport.utils.AttachmentProcessUtil;
 import com.jackasher.ageiport.utils.IrMessageUtils;
 import com.jackasher.ageiport.utils.SpringContextUtil;
 import com.jackasher.ageiport.model.pojo.IrMessage;
@@ -276,28 +277,13 @@ public class IrMessageExportProcessor implements ExportProcessor<IrMessageQuery,
         int subTaskNo = context.getSubTask().getSubTaskNo(); // 把子任务编号当作页码
         log.info("[LIFECYCLE-SUB-2] convert on subTask: {}: 开始处理批次 #{} 的附件...", subTaskId, subTaskNo);
 
-        // 1.  判断是否需要执行附件处理逻辑 (根据前端查询参数)
-        Boolean isProcessAttachments = irMessageQuery.getExportParams().getProcessAttachments();
-        if (isProcessAttachments != null && isProcessAttachments) {
-            try {
-                AttachmentProcessingService attachmentService = SpringContextUtil.getBean("attachmentProcessingServiceImpl",AttachmentProcessingService.class);
-                
-                // 使用异步处理附件，避免阻塞主流程
-                attachmentService.processAndPackageAttachmentsAsync(irMessageDataList, subTaskId, subTaskNo, irMessageQuery)
-                    .whenComplete((result, throwable) -> {
-                        if (throwable != null) {
-                            log.error("子任务 {} 异步处理附件时发生错误: {}", subTaskId, throwable.getMessage(), throwable);
-                        } else {
-                            log.info("子任务 {} 的附件异步处理已完成", subTaskId);
-                        }
-                    });
-                log.info("子任务 {} 的附件处理已提交到线程池，不阻塞Excel生成", subTaskId);
-            } catch (Exception e) {
-                // 只记录日志，不中断导出流程
-                log.error("子任务 {} 在提交附件处理任务时发生错误，但导出将继续。错误: {}", subTaskId, e.getMessage(), e);
-            }
-        } else {
-            log.info("子任务 {} 跳过附件处理流程。", subTaskId);
+        // 1. 处理附件（支持多种模式：同步/异步/延迟/跳过）
+        try {
+            String mainTaskId = context.getMainTask().getMainTaskId();
+            AttachmentProcessUtil.processAttachments(irMessageDataList, subTaskId, subTaskNo, irMessageQuery, mainTaskId);
+        } catch (Exception e) {
+            // 只记录日志，不中断导出流程
+            log.error("子任务 {} 在处理附件时发生错误，但导出将继续。错误: {}", subTaskId, e.getMessage(), e);
         }
 
         // 2.  执行数据模型转换，生成用于Excel的View列表
