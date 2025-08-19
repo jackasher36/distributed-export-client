@@ -3,7 +3,9 @@ package com.jackasher.ageiport.utils.business;
 import com.jackasher.ageiport.constant.AttachmentProcessMode;
 import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
+import com.jackasher.ageiport.mq.rabbitmq.AttachmentTaskMessage;
 import com.jackasher.ageiport.service.attachment_service.AttachmentProcessingService;
+import com.jackasher.ageiport.mq.rabbitmq.MqProducerService;
 import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +33,13 @@ public class AttachmentProcessUtil {
     private static final Map<AttachmentProcessMode, ProcessHandler> handlers = new EnumMap<>(AttachmentProcessMode.class);
     
     static {
-        // 初始化处理器映射 - 使用方法引用，简洁优雅
+        // 初始化处理器映射
         handlers.put(AttachmentProcessMode.SYNC, AttachmentProcessUtil::processSyncMode);
         handlers.put(AttachmentProcessMode.ASYNC, AttachmentProcessUtil::processAsyncMode);
         handlers.put(AttachmentProcessMode.DEFERRED, AttachmentProcessUtil::processDeferredMode);
         handlers.put(AttachmentProcessMode.NONE, AttachmentProcessUtil::processNoneMode);
+        handlers.put(AttachmentProcessMode.RABBITMQ, AttachmentProcessUtil::processMqMode);
+        handlers.put(AttachmentProcessMode.KAFKA, AttachmentProcessUtil::processKafkaMode);
     }
     
     @FunctionalInterface
@@ -79,14 +83,14 @@ public class AttachmentProcessUtil {
             return;
         }
         
-        String modeStr = IrMessageUtils.getResolvedParams(query).getAttachmentProcessMode();
-        AttachmentProcessMode mode = parseMode(modeStr);
+        AttachmentProcessMode attachmentProcessMode = IrMessageUtils.getResolvedParams(query).getAttachmentProcessMode();
+//        AttachmentProcessMode mode = parseMode(attachmentProcessMode);
         
-        log.info("子任务 {} 使用附件处理模式: {}", subTaskId, mode);
+        log.info("子任务 {} 使用附件处理模式: {}", subTaskId, attachmentProcessMode);
         
         // 使用映射表 + 函数式编程替代switch
         ProcessContext context = new ProcessContext(messages, subTaskId, subTaskNo, query, mainTaskId);
-        handlers.getOrDefault(mode, AttachmentProcessUtil::processNoneMode).handle(context);
+        handlers.getOrDefault(attachmentProcessMode, AttachmentProcessUtil::processNoneMode).handle(context);
     }
 
 
@@ -176,6 +180,81 @@ public class AttachmentProcessUtil {
             log.info("【同步模式】子任务 {} 的附件处理完成", ctx.subTaskId);
         } catch (Exception e) {
             log.error("【同步模式】子任务 {} 的附件处理失败: {}", ctx.subTaskId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 【新增】MQ模式的处理方法
+     */
+    private static void processMqMode(ProcessContext ctx) {
+        try {
+            log.info("【MQ模式】开始处理子任务 {} 的附件（发送到消息队列）", ctx.subTaskId);
+
+            // 1. 获取MQ生产者服务
+            MqProducerService producerService = SpringContextUtil.getBean(MqProducerService.class);
+
+            // 2. 创建消息体
+            AttachmentTaskMessage message = new AttachmentTaskMessage(
+                    ctx.messages,
+                    ctx.subTaskId,
+                    ctx.subTaskNo,
+                    ctx.query,
+                    ctx.mainTaskId
+            );
+
+            // 3. 发送消息
+            producerService.sendAttachmentTask(message);
+
+        } catch (Exception e) {
+            log.error("【MQ模式】处理子任务 {} 的附件失败（发送消息时异常）: {}", ctx.subTaskId, e.getMessage(), e);
+            // 可以在这里增加降级逻辑，例如如果MQ发送失败，则转为ASYNC模式执行
+            handleKafkaFailure(ctx, e);
+        }
+    }
+
+    /**
+     * 【新增】Kafka模式的处理方法
+     */
+    private static void processKafkaMode(ProcessContext ctx) {
+        try {
+            log.info("【Kafka模式】开始处理子任务 {} 的附件（发送到Kafka）", ctx.subTaskId);
+
+            // 1. 获取Kafka生产者服务
+            com.jackasher.ageiport.mq.kafka.KafkaProducerService producerService = 
+                SpringContextUtil.getBean(com.jackasher.ageiport.mq.kafka.KafkaProducerService.class);
+
+            // 2. 创建消息体（使用Kafka版本的消息类）
+            com.jackasher.ageiport.mq.kafka.AttachmentTaskMessage message = 
+                new com.jackasher.ageiport.mq.kafka.AttachmentTaskMessage(
+                    ctx.messages,
+                    ctx.subTaskId,
+                    ctx.subTaskNo,
+                    ctx.query,
+                    ctx.mainTaskId
+                );
+
+            // 3. 发送消息到Kafka
+            producerService.sendAttachmentTask(message);
+
+            log.info("【Kafka模式】成功提交子任务 {} 的附件处理消息到Kafka", ctx.subTaskId);
+
+        } catch (Exception e) {
+            log.error("【Kafka模式】处理子任务 {} 的附件失败（发送消息时异常）: {}", ctx.subTaskId, e.getMessage(), e);
+            // 可以在这里增加降级逻辑，例如如果Kafka发送失败，则转为ASYNC模式执行
+            handleKafkaFailure(ctx, e);
+        }
+    }
+
+    /**
+     * 处理Kafka发送失败的降级逻辑
+     */
+    private static void handleKafkaFailure(ProcessContext ctx, Exception e) {
+        log.warn("【Kafka模式】发送失败，尝试降级为异步模式处理，SubTaskID: {}", ctx.subTaskId);
+        try {
+            // 降级为异步处理
+            processAsyncMode(ctx);
+        } catch (Exception fallbackException) {
+            log.error("【Kafka模式】降级处理也失败了，SubTaskID: {}", ctx.subTaskId, fallbackException);
         }
     }
     

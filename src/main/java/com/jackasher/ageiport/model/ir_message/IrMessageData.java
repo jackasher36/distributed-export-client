@@ -1,6 +1,8 @@
 package com.jackasher.ageiport.model.ir_message;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
+import java.io.Serializable;
 import java.util.Date;
 
 import com.jackasher.ageiport.model.pojo.IrMessage;
@@ -12,7 +14,8 @@ import lombok.Data;
  */
 @TableName(value ="ir_message")
 @Data
-public class IrMessageData {
+public class IrMessageData implements Serializable {
+    private static final long serialVersionUID = 1L;
     /**
      *
      */

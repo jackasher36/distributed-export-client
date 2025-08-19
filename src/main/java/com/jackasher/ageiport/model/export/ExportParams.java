@@ -1,6 +1,9 @@
 package com.jackasher.ageiport.model.export;
 
+import com.jackasher.ageiport.constant.AttachmentProcessMode;
 import lombok.Data;
+
+import java.io.Serializable;
 
 
 /**
@@ -9,7 +12,8 @@ import lombok.Data;
  * 用于导出任务参数配置,会覆盖原有的配置文件配置
  **/
 @Data
-public class ExportParams {
+public class ExportParams implements Serializable {
+    private static final long serialVersionUID = 1L;
     /**
      * 导出数据总条数
      */
@@ -70,7 +74,7 @@ public class ExportParams {
     /**
      * 附件处理模式：SYNC/ASYNC/DEFERRED/NONE
      */
-    private String attachmentProcessMode;
+    private AttachmentProcessMode attachmentProcessMode;
 
     /**
      * excel文件保存目录
@@ -94,7 +98,8 @@ public class ExportParams {
      * 内部静态类，用于映射 thread-pool 配置
      */
     @Data
-    public static class ThreadPool {
+    public static class ThreadPool implements Serializable {
+        private static final long serialVersionUID = 1L;
 
         /**
          * 核心线程数量

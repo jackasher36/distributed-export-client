@@ -7,6 +7,7 @@ package com.jackasher.ageiport.config.export;
  * @since 1.0
  **/
 
+import com.jackasher.ageiport.constant.AttachmentProcessMode;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -90,7 +91,7 @@ public class ExportProperties {
     /**
      * 附件处理模式：SYNC/ASYNC/DEFERRED/NONE
      */
-    private String attachmentProcessMode = "ASYNC";
+    private AttachmentProcessMode attachmentProcessMode = AttachmentProcessMode.SYNC;
 
 
     /**
