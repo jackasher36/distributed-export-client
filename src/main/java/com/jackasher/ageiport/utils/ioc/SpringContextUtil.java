@@ -1,4 +1,4 @@
-package com.jackasher.ageiport.utils;
+package com.jackasher.ageiport.utils.ioc;
 
 import com.jackasher.ageiport.config.export.ExportProperties;
 import com.jackasher.ageiport.mapper.IrMessageMapper;
@@ -8,10 +8,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Spring上下文工具类，用于在非Spring管理的类中获取Spring Bean

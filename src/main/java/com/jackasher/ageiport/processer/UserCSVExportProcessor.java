@@ -11,7 +11,7 @@ import com.alibaba.ageiport.processor.core.task.exporter.api.BizExportTaskRuntim
 import com.jackasher.ageiport.model.user.UserData;
 import com.jackasher.ageiport.model.user.UserQuery;
 import com.jackasher.ageiport.model.user.UserView;
-import com.jackasher.ageiport.utils.DatabaseUtil;
+import com.jackasher.ageiport.demo.DatabaseUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

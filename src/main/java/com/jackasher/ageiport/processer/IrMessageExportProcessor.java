@@ -22,10 +22,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import com.jackasher.ageiport.model.ir_message.IrMessageView;
-import com.jackasher.ageiport.service.attachment_service.AttachmentProcessingService;
-import com.jackasher.ageiport.utils.AttachmentProcessUtil;
-import com.jackasher.ageiport.utils.IrMessageUtils;
-import com.jackasher.ageiport.utils.SpringContextUtil;
+import com.jackasher.ageiport.utils.business.AttachmentProcessUtil;
+import com.jackasher.ageiport.utils.business.IrMessageUtils;
+import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 import com.jackasher.ageiport.model.pojo.IrMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +32,8 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.jackasher.ageiport.utils.IrMessageUtils.*;
-import static com.jackasher.ageiport.utils.IrMessageUtils.getResolvedParams;
+import static com.jackasher.ageiport.utils.business.IrMessageUtils.*;
+import static com.jackasher.ageiport.utils.business.IrMessageUtils.getResolvedParams;
 
 /**
  * IR消息导出处理器,每个要处理的表,都需要实现一个处理器

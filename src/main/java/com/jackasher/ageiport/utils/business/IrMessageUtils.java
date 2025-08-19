@@ -1,4 +1,4 @@
-package com.jackasher.ageiport.utils;
+package com.jackasher.ageiport.utils.business;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.jackasher.ageiport.model.export.ExportParams;
@@ -6,7 +6,7 @@ import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import com.jackasher.ageiport.model.ir_message.IrMessageView;
 import com.jackasher.ageiport.model.pojo.IrMessage;
-import com.jackasher.ageiport.processer.IrMessageExportProcessor;
+import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 import com.jackasher.ageiport.utils.params.reflect.ExportConfigResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

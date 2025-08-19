@@ -2,7 +2,7 @@ package com.jackasher.ageiport.callback;
 
 import com.alibaba.ageiport.processor.core.model.core.impl.MainTask;
 import com.jackasher.ageiport.constant.MainTaskCallbackConstant;
-import com.jackasher.ageiport.utils.SpringContextUtil;
+import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 import org.springframework.context.ApplicationContext;
 
 /**

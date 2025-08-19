@@ -1,4 +1,4 @@
-package com.jackasher.ageiport.utils;
+package com.jackasher.ageiport.utils.network;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;

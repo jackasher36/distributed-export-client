@@ -8,7 +8,6 @@ import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 
 /**
  * 附件处理服务接口
- * 支持同步和异步两种处理方式
  */
 public interface AttachmentProcessingService {
     

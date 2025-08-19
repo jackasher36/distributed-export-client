@@ -19,8 +19,7 @@ import com.jackasher.ageiport.constant.MainTaskCallbackConstant;
 import com.jackasher.ageiport.service.callback_service.AlertService;
 import com.jackasher.ageiport.service.callback_service.BusinessTaskService;
 import com.jackasher.ageiport.service.callback_service.WebSocketService;
-import com.jackasher.ageiport.utils.AttachmentProcessUtil;
-import com.jackasher.ageiport.utils.SpringContextUtil;
+import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 
 /**
  * 任务回调钩子,全局只执行一次。

@@ -46,7 +46,7 @@ public class MemoryMonitorService {
         try {
             MemoryAnalysisResult result = getCurrentMemoryInfo();
             logMemoryInfo(result);
-            
+
             // 如果内存使用率超过80%，记录警告
             if (result.getHeapUsagePercent() > 80.0) {
                 log.warn("⚠️ 内存使用率过高: {}%, 建议进行GC或检查内存泄漏", 

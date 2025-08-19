@@ -3,8 +3,7 @@ package com.jackasher.ageiport.utils.params.resolver;
 
 import com.jackasher.ageiport.config.export.ExportProperties;
 import com.jackasher.ageiport.model.export.ExportParams;
-import com.jackasher.ageiport.utils.SpringContextUtil;
-import org.springframework.stereotype.Service;
+import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 
 //@Service
 

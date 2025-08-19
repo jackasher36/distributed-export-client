@@ -1,5 +1,7 @@
 package com.jackasher.ageiport.config.thread;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import lombok.Data;
@@ -76,6 +78,17 @@ public class ThreadPoolConfig {
                 corePoolSize, maxPoolSize, queueCapacity);
         
         return executor;
+    }
+
+    @Bean("serialAttachmentTaskExecutor")
+    public Executor serialAttachmentTaskExecutor() {
+        log.info("串行附件处理线程池初始化完成。");
+        // Executors.newSingleThreadExecutor() 会创建一个队列无界的单线程池
+        return Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "serial-attachment-executor");
+            t.setDaemon(true); // 设为守护线程
+            return t;
+        });
     }
 
 }

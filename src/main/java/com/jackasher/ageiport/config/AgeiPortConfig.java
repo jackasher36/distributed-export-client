@@ -8,7 +8,7 @@ import com.alibaba.ageiport.processor.core.AgeiPortOptions;
 import com.alibaba.ageiport.processor.core.client.http.HttpTaskServerClientOptions;
 import com.jackasher.ageiport.config.filestore.FileStoreOptionsFactory;
 import com.jackasher.ageiport.constant.MainTaskCallbackConstant;
-import com.jackasher.ageiport.utils.NetworkUtils;
+import com.jackasher.ageiport.utils.network.NetworkUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.ConfigurableApplicationContext;

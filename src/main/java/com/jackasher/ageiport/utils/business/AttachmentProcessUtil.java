@@ -1,18 +1,18 @@
-package com.jackasher.ageiport.utils;
+package com.jackasher.ageiport.utils.business;
 
 import com.jackasher.ageiport.constant.AttachmentProcessMode;
 import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import com.jackasher.ageiport.service.attachment_service.AttachmentProcessingService;
+import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  * 附件处理工具类 - 简化附件处理逻辑
@@ -88,6 +88,9 @@ public class AttachmentProcessUtil {
         ProcessContext context = new ProcessContext(messages, subTaskId, subTaskNo, query, mainTaskId);
         handlers.getOrDefault(mode, AttachmentProcessUtil::processNoneMode).handle(context);
     }
+
+
+    // ==================== 延迟队列的处理策略 ====================
     
     /**
      * 主任务完成后触发延迟处理
@@ -101,6 +104,51 @@ public class AttachmentProcessUtil {
             tasks.forEach(CompletableFuture::runAsync);
         } else {
             log.info("主任务 {} 没有延迟的附件处理任务", mainTaskId);
+        }
+    }
+    /**
+     * 【新方法】以严格串行且失败即停止的方式触发延迟任务。
+     * @param mainTaskId 主任务ID
+     * @param executorService 必须是单线程的 ExecutorService
+     */
+    public static void triggerDeferredTasksSerially(String mainTaskId, ExecutorService executorService) {
+        List<Runnable> tasks = deferredTasks.remove(mainTaskId);
+        if (tasks == null || tasks.isEmpty()) {
+            log.info("主任务 {} 在本节点上没有需要延迟处理的附件任务", mainTaskId);
+            return;
+        }
+
+        log.info("主任务 {} 完成，准备以【严格串行】方式执行 {} 个附件任务", mainTaskId, tasks.size());
+
+        // 使用迭代器来手动控制流程
+        final Iterator<Runnable> iterator = tasks.iterator();
+
+        // 提交一个“引导”任务，它负责启动整个链式调用
+        executorService.submit(() -> processNextTask(iterator, executorService, mainTaskId));
+    }
+
+    private static void processNextTask(Iterator<Runnable> iterator, ExecutorService executorService, String mainTaskId) {
+        if (!iterator.hasNext()) {
+            log.info("主任务 {} 的所有附件任务已全部执行完毕。", mainTaskId);
+            return;
+        }
+
+        Runnable nextTask = iterator.next();
+        Future<?> future = executorService.submit(nextTask);
+
+        try {
+            // 阻塞等待当前任务完成
+            future.get();
+            log.info("一个附件任务成功完成，准备执行下一个...");
+
+            // 当前任务成功后，递归地提交下一个任务
+            processNextTask(iterator, executorService, mainTaskId);
+
+        } catch (Exception e) {
+            // InterruptedException, ExecutionException, CancellationException 都会被捕获
+            log.error("附件处理链中有一个任务失败，后续所有任务将不再执行。MainTaskID: {}, 失败原因: {}",
+                    mainTaskId, e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
+            // 出现异常，递归链中断，不再提交新任务。
         }
     }
     
