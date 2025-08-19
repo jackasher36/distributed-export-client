@@ -1,3 +1,5 @@
+
+
 # AGEIPort 分布式导出客户端 - 企业级最佳实践与改造指南
 
 本仓库是一个基于阿里巴巴开源的 [AGEIPort](https://github.com/alibaba/AGEIPort) 分布式导入导出框架构建的**企业级最佳实践模板**。它演示了如何将 AGEIPort 深度集成到现代微服务技术栈（Spring Boot/Cloud）中，并提供了一套**高内聚、低耦合、易扩展**的解决方案。
@@ -24,6 +26,10 @@
 
 一个完整的 AGEIPort 生产环境通常由以下几个部分组成：
 
+
+
+
+
 ```mermaid
 graph TB
     subgraph UI ["🖥️ 用户界面层 (User Interface)"]
@@ -47,9 +53,9 @@ graph TB
 
     subgraph Controllers ["🎮 控制器层 (Controllers)"]
         direction LR
-        DataExportCtrl["📊 数据导出控制器<br/>(IrMessage/User Export)"]
-        ProgressCtrl["📈 进度监控控制器<br/>(DataProgress)"]
-        MemoryCtrl["💾 内存监控控制器<br/>(MemoryMonitor)"]
+        DataExportCtrl["📊 数据导出控制器"]
+        ProgressCtrl["📈 进度监控控制器"]
+        MemoryCtrl["💾 内存监控控制器"]
     end
 
     subgraph Services ["🔧 服务层 (Services)"]
@@ -57,15 +63,15 @@ graph TB
         
         subgraph BusinessServices ["业务服务"]
             direction LR
-            ExportProcessor["📄 导出处理器<br/>(IrMessage/CSV Processor)"]
-            CallbackService["🔔 回调服务<br/>(Alert/WebSocket)"]
-            ProgressTracker["📊 进度跟踪服务<br/>(ProgressTracker)"]
+            ExportProcessor["📄 导出处理器"]
+            CallbackService["🔔 回调服务"]
+            ProgressTracker["📊 进度跟踪服务"]
         end
         
         subgraph DataServices ["数据服务"]
             direction LR
-            BatchDataService["🔄 批量数据处理服务<br/>(BatchDataProcessing)"]
-            AttachmentUtil["📎 附件处理工具<br/>(AttachmentProcess)"]
+            BatchDataService["🔄 批量数据处理"]
+            AttachmentUtil["📎 附件处理"]
         end
     end
 
@@ -73,42 +79,42 @@ graph TB
         direction TB
         
         subgraph Discovery ["🧭 服务发现"]
-            NacosRegistry["Nacos注册中心<br/>(服务注册与发现)"]
-            NacosConfig["Nacos配置中心<br/>(配置管理)"]
+            NacosRegistry["Nacos注册中心"]
+            NacosConfig["Nacos配置中心"]
         end
         
         subgraph Storage ["📦 存储系统"]
             direction LR
-            MinIO["MinIO对象存储<br/>(文件存储)"]
-            AliOSS["阿里云OSS<br/>(云端存储)"]
+            MinIO["MinIO对象存储"]
+            AliOSS["阿里云OSS"]
         end
         
         subgraph Database ["🗄️ 数据库"]
-            MySQL["MySQL数据库<br/>(关系型数据)"]
-            MyBatisPlus["MyBatis-Plus<br/>(ORM框架)"]
+            MySQL["MySQL数据库"]
+            MyBatisPlus["MyBatis-Plus"]
         end
         
         subgraph Cache ["💾 缓存层"]
-            Redis["Redis缓存<br/>(进度/会话数据)"]
+            Redis["Redis缓存"]
         end
         
         subgraph MessageQueue ["📬 消息队列"]
             direction LR
-            Kafka["Apache Kafka<br/>(大数据场景)"]
-            RabbitMQ["RabbitMQ<br/>(通用消息)"]
+            Kafka["Apache Kafka"]
+            RabbitMQ["RabbitMQ"]
         end
     end
 
     subgraph Monitoring ["📈 监控层 (Monitoring)"]
         direction LR
-        MemoryMonitor["内存监控<br/>(MemoryAnalysis)"]
-        ProgressMonitor["进度监控<br/>(Real-time Progress)"]
-        LogMonitor["日志监控<br/>(Application Logs)"]
+        MemoryMonitor["内存监控"]
+        ProgressMonitor["进度监控"]
+        LogMonitor["日志监控"]
     end
 
     %% 用户交互流
-    WebUI -.->|"1. 发起导出请求"| DataExportCtrl
-    WebUI -.->|"2. 查询进度"| ProgressCtrl
+    WebUI -.->|"导出请求"| DataExportCtrl
+    WebUI -.->|"查询进度"| ProgressCtrl
     API_Client -.->|"API调用"| Controllers
 
     %% 控制器到服务层
@@ -122,13 +128,13 @@ graph TB
     MasterNode -.->|"P2P通信"| WorkerNodeN
 
     %% 服务层到基础设施
-    ClientCluster -->|"3. 任务注册/状态更新"| TaskServer
-    ClientCluster -->|"4. 服务发现"| NacosRegistry
-    ClientCluster -->|"5. 配置获取"| NacosConfig
-    ClientCluster -->|"6. 文件读写"| Storage
-    ClientCluster -->|"7. 业务数据查询"| Database
-    ClientCluster -->|"8. 进度数据读写"| Cache
-    ClientCluster -->|"9. 异步任务投递"| MessageQueue
+    ClientCluster -->|"任务注册/更新"| TaskServer
+    ClientCluster -->|"服务发现"| NacosRegistry
+    ClientCluster -->|"配置获取"| NacosConfig
+    ClientCluster -->|"文件读写"| Storage
+    ClientCluster -->|"查询数据"| Database
+    ClientCluster -->|"进度缓存"| Cache
+    ClientCluster -->|"异步任务"| MessageQueue
 
     %% 服务依赖
     TaskServer --> Database
@@ -153,6 +159,7 @@ graph TB
     style Cache fill:#fff2cc,stroke:#333,stroke-width:1px
     style MessageQueue fill:#ffcccc,stroke:#333,stroke-width:1px
     style Discovery fill:#e6f3ff,stroke:#333,stroke-width:1px
+
 ```
 
 **你的工作范围**：主要在 `ageiport-client` 中实现**业务逻辑**，特别是 `ExportProcessor`，并确保其他基础设施服务（Task Server, Nacos/Eureka, MySQL, MinIO, Redis, RabbitMQ/Kafka等）已正确部署和配置。
@@ -202,18 +209,18 @@ graph TB
 2. **配置 `application-dev.yml`**
    打开 `src/main/resources/application-dev.yml`，修改以下**所有**标记为你自己的环境信息：
 
-    -   `spring.datasource`: 连接到你的**业务数据库**。
-    -   `spring.redis`: 你的 Redis 地址。
-    -   `spring.cloud.nacos.server-addr` 或 `eureka.client.service-url`: 你的服务发现中心地址。
-    -   `spring.rabbitmq` / `spring.kafka`: 你的消息队列地址（如果使用）。
-    -   `ageiport.file-store`: 配置你的 MinIO 或 OSS 信息。
-    -   `ageiport.taskServerClientOptions.endpoint`: 你的 `ageiport-task-server` 服务的地址。
+   -   `spring.datasource`: 连接到你的**业务数据库**。
+   -   `spring.redis`: 你的 Redis 地址。
+   -   `spring.cloud.nacos.server-addr` 或 `eureka.client.service-url`: 你的服务发现中心地址。
+   -   `spring.rabbitmq` / `spring.kafka`: 你的消息队列地址（如果使用）。
+   -   `ageiport.file-store`: 配置你的 MinIO 或 OSS 信息。
+   -   `ageiport.taskServerClientOptions.endpoint`: 你的 `ageiport-task-server` 服务的地址。
 
 3. **准备业务测试数据 (重要)**
    大数据量是体现分布式导出价值的关键。
 
-    -   **执行脚本**: 在你的**业务数据库**中执行 `src/main/resources/ir_message.sql` 脚本，创建 `ir_message` 表。
-    -   **生成数据**: 强烈建议使用数据库工具（如 DataGrip, Navicat）或存储过程，向 `ir_message` 表中插入**百万级别**的模拟数据。
+   -   **执行脚本**: 在你的**业务数据库**中执行 `src/main/resources/ir_message.sql` 脚本，创建 `ir_message` 表。
+   -   **生成数据**: 强烈建议使用数据库工具（如 DataGrip, Navicat）或存储过程，向 `ir_message` 表中插入**百万级别**的模拟数据。
 
 4. **启动应用**
    运行 `AgeiPortApplication.java` 的 `main` 方法，或使用 Maven 启动：
@@ -242,7 +249,7 @@ graph TB
        }'
    ```
 
-    -   `attachmentProcessMode`: 可以尝试 `ASYNC`, `KAFKA`, `DEFERRED` 等不同值来体验不同的后处理模式。
+   -   `attachmentProcessMode`: 可以尝试 `ASYNC`, `KAFKA`, `DEFERRED` 等不同值来体验不同的后处理模式。
 
 6. **监控进度**
    在收到包含 `mainTaskId` 的响应后，立即开始轮询进度接口：
@@ -299,10 +306,10 @@ ProductExportProcessor=com.jackasher.ageiport.processer.ProductExportProcessor
 -   **多 Sheet 导出**: 参考 `IrMessageExportProcessor` 中对 `getHeaders` 和 `group` 方法的重写。通过为表头设置不同的 `groupIndex`，可以动态地将数据分配到不同的 Sheet 中。
 -   **任务回调**: 修改 `com.jackasher.ageiport.callback.MainTaskCallback.java` 中的方法，可以实现任务成功/失败时发送邮件、钉钉通知、更新业务数据库等逻辑。
 -   **自定义数据处理业务**:`BatchDataProcessingServiceImplDemo`已经实现同步异步功能, 只需在`processData`编写你自己的数据处理模块,如果还想要更多的自定义业务处理模式参考:
-    1.  在 `AttachmentProcessMode` 枚举中添加你的新模式。
-    2.  在 `BatchDataProcessingService` 接口和实现中添加你的新业务方法（参考 `AttachmentProcessingServiceImpl`）。
-    3.  在 `AttachmentProcessUtil` 中注册你的新模式和对应的处理方法。
-    4.  最后，在你的 `Processor#convert` 方法中调用 `AttachmentProcessUtil.processAttachments` 即可触发。
+   1.  在 `AttachmentProcessMode` 枚举中添加你的新模式。
+   2.  在 `BatchDataProcessingService` 接口和实现中添加你的新业务方法（参考 `AttachmentProcessingServiceImpl`）。
+   3.  在 `AttachmentProcessUtil` 中注册你的新模式和对应的处理方法。
+   4.  最后，在你的 `Processor#convert` 方法中调用 `AttachmentProcessUtil.processAttachments` 即可触发。
 
 ## 7. 项目结构解析
 
