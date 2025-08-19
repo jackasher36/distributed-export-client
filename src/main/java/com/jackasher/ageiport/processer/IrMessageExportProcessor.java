@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import com.jackasher.ageiport.model.ir_message.IrMessageView;
+import com.jackasher.ageiport.service.data_processing_service.ProgressTrackerService;
 import com.jackasher.ageiport.utils.business.AttachmentProcessUtil;
 import com.jackasher.ageiport.utils.business.IrMessageUtils;
 import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
@@ -275,6 +276,7 @@ public class IrMessageExportProcessor implements ExportProcessor<IrMessageQuery,
         String subTaskId = context.getSubTask().getSubTaskId();
         int subTaskNo = context.getSubTask().getSubTaskNo(); // 把子任务编号当作页码
         log.info("[LIFECYCLE-SUB-2] convert on subTask: {}: 开始处理批次 #{} 的附件...", subTaskId, subTaskNo);
+
 
         // 1. 处理附件（支持多种模式：同步/异步/延迟/跳过）
         try {

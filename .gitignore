@@ -65,6 +65,6 @@ Thumbs.db
 # Demo 示例代码和文件
 src/main/java/com/jackasher/ageiport/demo/
 
-src/main/java/com/jackasher/ageiport/service/attachment_service/AttachmentProcessingServiceImpl.java
+src/main/java/com/jackasher/ageiport/service/data_processing_service/AttachmentProcessingServiceImpl.java
 
 .idea/

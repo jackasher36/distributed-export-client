@@ -1,9 +1,9 @@
 package com.jackasher.ageiport.mq.kafka;
 
-import com.jackasher.ageiport.service.attachment_service.AttachmentProcessingService;
-import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
+import com.jackasher.ageiport.service.data_processing_service.BatchDataProcessingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -18,12 +18,13 @@ import javax.annotation.Resource;
  * @author Jackasher
  */
 @Service
+@ConditionalOnProperty(name = "ageiport.export.attachment-process-mode", havingValue = "kafka")
 public class KafkaConsumerService {
     
     private static final Logger log = LoggerFactory.getLogger(KafkaConsumerService.class);
 
     @Resource(name = "attachmentProcessingServiceImpl")
-    private AttachmentProcessingService attachmentProcessingService;
+    private BatchDataProcessingService batchDataProcessingService;
     
     /**
      * 监听附件处理任务
@@ -80,13 +81,13 @@ public class KafkaConsumerService {
         try {
             String subTaskId = message.getSubTaskId();
             
-            if (attachmentProcessingService != null && message.getMessages() != null && !message.getMessages().isEmpty()) {
+            if (batchDataProcessingService != null && message.getMessages() != null && !message.getMessages().isEmpty()) {
                 log.info("开始处理附件，SubTaskID: {}, 文件数量: {}", 
                     message.getSubTaskId(), message.getMessages().size());
                 
                 // 调用附件处理服务
                 // 调用核心业务逻辑执行附件处理
-                attachmentProcessingService.processAndPackageAttachments(
+                batchDataProcessingService.processData(
                         message.getMessages(),
                         subTaskId,
                         message.getSubTaskNo(),

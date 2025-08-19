@@ -1,4 +1,4 @@
-package com.jackasher.ageiport.controller;
+package com.jackasher.ageiport.controller.database;
 
 import com.alibaba.ageiport.common.logger.Logger;
 import com.alibaba.ageiport.common.logger.LoggerFactory;

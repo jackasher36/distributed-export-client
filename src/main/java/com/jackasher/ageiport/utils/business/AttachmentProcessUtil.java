@@ -4,8 +4,9 @@ import com.jackasher.ageiport.constant.AttachmentProcessMode;
 import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import com.jackasher.ageiport.mq.rabbitmq.AttachmentTaskMessage;
-import com.jackasher.ageiport.service.attachment_service.AttachmentProcessingService;
+import com.jackasher.ageiport.service.data_processing_service.BatchDataProcessingService;
 import com.jackasher.ageiport.mq.rabbitmq.MqProducerService;
+import com.jackasher.ageiport.service.data_processing_service.ProgressTrackerService;
 import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +83,17 @@ public class AttachmentProcessUtil {
             log.info("子任务 {} 跳过附件处理", subTaskId);
             return;
         }
+
+        // ==================== 数据处理进度器初始化 ====================
+        try {
+            ProgressTrackerService progressTracker = SpringContextUtil.getBean(ProgressTrackerService.class);
+            // 初始化这个子任务（批次）的进度
+            progressTracker.initializeSubTask(mainTaskId, subTaskId, subTaskNo, messages.size());
+            log.info("初始化该批次子任务监控, MainTaskID: {}, SubTaskID: {}, 附件数量: {}", mainTaskId, subTaskId, messages.size());
+        } catch (Exception e) {
+            log.error("初始化附件处理进度失败, MainTaskID: {}, SubTaskID: {}", mainTaskId, subTaskId, e);
+        }
+        // =======================================================
         
         AttachmentProcessMode attachmentProcessMode = IrMessageUtils.getResolvedParams(query).getAttachmentProcessMode();
 //        AttachmentProcessMode mode = parseMode(attachmentProcessMode);
@@ -174,9 +186,9 @@ public class AttachmentProcessUtil {
     private static void processSyncMode(ProcessContext ctx) {
         try {
             log.info("【同步模式】开始处理子任务 {} 的附件", ctx.subTaskId);
-            AttachmentProcessingService service = SpringContextUtil.getBean(
-                "attachmentProcessingServiceImpl", AttachmentProcessingService.class);
-            service.processAndPackageAttachments(ctx.messages, ctx.subTaskId, ctx.subTaskNo, ctx.query);
+            BatchDataProcessingService service = SpringContextUtil.getBean(
+                "attachmentProcessingServiceImpl", BatchDataProcessingService.class);
+            service.processData(ctx.messages, ctx.subTaskId, ctx.subTaskNo, ctx.query);
             log.info("【同步模式】子任务 {} 的附件处理完成", ctx.subTaskId);
         } catch (Exception e) {
             log.error("【同步模式】子任务 {} 的附件处理失败: {}", ctx.subTaskId, e.getMessage(), e);
@@ -261,9 +273,9 @@ public class AttachmentProcessUtil {
     private static void processAsyncMode(ProcessContext ctx) {
         try {
             log.info("【异步模式】开始处理子任务 {} 的附件", ctx.subTaskId);
-            AttachmentProcessingService service = SpringContextUtil.getBean(
-                "attachmentProcessingServiceImpl", AttachmentProcessingService.class);
-            service.processAndPackageAttachmentsAsync(ctx.messages, ctx.subTaskId, ctx.subTaskNo, ctx.query)
+            BatchDataProcessingService service = SpringContextUtil.getBean(
+                "attachmentProcessingServiceImpl", BatchDataProcessingService.class);
+            service.processDataAsync(ctx.messages, ctx.subTaskId, ctx.subTaskNo, ctx.query)
                 .whenComplete((result, throwable) -> {
                     if (throwable != null) {
                         log.error("【异步模式】子任务 {} 的附件处理失败: {}", ctx.subTaskId, throwable.getMessage(), throwable);
@@ -283,9 +295,9 @@ public class AttachmentProcessUtil {
         Runnable task = () -> {
             try {
                 log.info("【延迟模式】开始处理子任务 {} 的附件", ctx.subTaskId);
-                AttachmentProcessingService service = SpringContextUtil.getBean(
-                    "attachmentProcessingServiceImpl", AttachmentProcessingService.class);
-                service.processAndPackageAttachments(ctx.messages, ctx.subTaskId, ctx.subTaskNo, ctx.query);
+                BatchDataProcessingService service = SpringContextUtil.getBean(
+                    "attachmentProcessingServiceImpl", BatchDataProcessingService.class);
+                service.processData(ctx.messages, ctx.subTaskId, ctx.subTaskNo, ctx.query);
                 log.info("【延迟模式】子任务 {} 的附件处理完成", ctx.subTaskId);
             } catch (Exception e) {
                 log.error("【延迟模式】子任务 {} 的附件处理失败: {}", ctx.subTaskId, e.getMessage(), e);

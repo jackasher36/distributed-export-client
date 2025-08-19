@@ -1,4 +1,4 @@
-package com.jackasher.ageiport.controller;
+package com.jackasher.ageiport.controller.monitor;
 
 import com.jackasher.ageiport.service.monitor.MemoryAnalysisResult;
 import com.jackasher.ageiport.service.monitor.MemoryMonitorService;

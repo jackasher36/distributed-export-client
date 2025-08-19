@@ -1,2 +1,3 @@
 attachmentListener=com.jackasher.ageiport.listener.AttachmentSubTaskCompletionListener
 mainTaskCompletionListener=com.jackasher.ageiport.listener.MainTaskCompletionListener
+attachmentProgressInitializerListener=com.jackasher.ageiport.listener.ProgressInitializerListener

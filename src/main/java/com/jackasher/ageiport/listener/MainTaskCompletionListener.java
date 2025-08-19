@@ -41,6 +41,7 @@ public class MainTaskCompletionListener implements ManageableListener<TaskStageE
             return;
         }
 
+
         try {
             String mainTaskId = event.getMainTaskId();
             MainTask mainTask = ageiPort.getTaskServerClient().getMainTask(mainTaskId);

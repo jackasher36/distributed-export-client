@@ -1,4 +1,4 @@
-package com.jackasher.ageiport.service.attachment_service;
+package com.jackasher.ageiport.service.data_processing_service;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -9,7 +9,7 @@ import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 /**
  * 附件处理服务接口
  */
-public interface AttachmentProcessingService {
+public interface BatchDataProcessingService {
     
     /**
      * 同步处理附件（原有方法，保持向后兼容）
@@ -19,7 +19,7 @@ public interface AttachmentProcessingService {
      * @param pageNum 当前处理的页码/批次号
      * @param irMessageQuery 查询参数
      */
-    void processAndPackageAttachments(List<IrMessageData> messages, String subTaskId, int pageNum, IrMessageQuery irMessageQuery);
+    void processData(List<IrMessageData> messages, String subTaskId, int pageNum, IrMessageQuery irMessageQuery);
     
     /**
      * 异步处理附件（新增方法）
@@ -30,7 +30,7 @@ public interface AttachmentProcessingService {
      * @param irMessageQuery 查询参数
      * @return CompletableFuture，可用于监控处理状态和结果
      */
-    CompletableFuture<Void> processAndPackageAttachmentsAsync(List<IrMessageData> messages, String subTaskId, int pageNum, IrMessageQuery irMessageQuery);
+    CompletableFuture<Void> processDataAsync(List<IrMessageData> messages, String subTaskId, int pageNum, IrMessageQuery irMessageQuery);
     
     /**
      * 异步处理附件，带有超时控制
@@ -41,5 +41,5 @@ public interface AttachmentProcessingService {
      * @param timeoutSeconds 超时时间（秒）
      * @return CompletableFuture，带超时控制
      */
-    CompletableFuture<Void> processAndPackageAttachmentsAsync(List<IrMessageData> messages, String subTaskId, int pageNum, IrMessageQuery irMessageQuery, long timeoutSeconds);
+    CompletableFuture<Void> processDataAsync(List<IrMessageData> messages, String subTaskId, int pageNum, IrMessageQuery irMessageQuery, long timeoutSeconds);
 }
