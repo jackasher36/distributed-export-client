@@ -162,6 +162,72 @@ graph TB
 
 ```
 
+该框架是基于事件驱动的架构流程, 要想理解这个分布式任务导出框架,就需要理解它的事件流, 下面是一个基本的事件驱动流程:
+
+```mermaid
+sequenceDiagram
+    participant ClientCode as 业务代码
+    participant TaskServiceImpl as TaskServiceImpl
+    participant TaskAcceptor as DefaultTaskAcceptor
+    participant MainWorker as ExportMainTaskWorker
+    participant Listener as ...EventListener
+    participant Dispatcher as Dispatcher
+    participant SubWorker as ExportSubTaskWorker
+    participant EventBus as EventBus
+
+    ClientCode->>TaskServiceImpl: executeTask()
+    TaskServiceImpl->>TaskAcceptor: accept(mainTask)
+    
+    Note right of TaskAcceptor: 发布第一个事件
+    TaskAcceptor->>EventBus: post(TaskStageEvent: CREATED)
+    
+    EventBus-->>Listener: TaskStageEventListener.handle()
+    Listener-->>Listener: 更新内存进度
+    
+    TaskAcceptor->>EventBus: post(WaitDispatchMainTaskPrepareEvent)
+    
+    EventBus-->>Listener: WaitDispatchMainTaskPrepareEventListener.handle()
+    Listener->>Dispatcher: dispatchMainTaskPrepare()
+    Dispatcher->>MainWorker: doPrepare()
+    
+    activate MainWorker
+    MainWorker-->>MainWorker: totalCount(), slice(), createSubTasks()
+    Note right of MainWorker: 发布第二个事件
+    MainWorker->>EventBus: post(WaitDispatchSubTaskEvent)
+    
+    EventBus-->>Listener: WaitDispatchSubTaskEventListener.handle()
+    Listener->>Dispatcher: dispatchSubTasks()
+    Dispatcher->>SubWorker: P2P分发, 触发run()
+    
+    Note right of MainWorker: 主控节点 prepare 阶段结束, 等待
+    deactivate MainWorker
+
+    activate SubWorker
+    loop 每个子任务
+        SubWorker-->>SubWorker: queryData(), convert(), group()
+        Note right of SubWorker: 发布多个TaskStageEvent
+        SubWorker->>EventBus: post(TaskStageEvent: QUERY_END)
+        SubWorker->>EventBus: post(TaskStageEvent: CONVERT_END)
+        SubWorker-->>SubWorker: 写入中间文件
+    end
+    SubWorker->>EventBus: post(TaskStageEvent: FINISHED)
+    deactivate SubWorker
+
+    Note over EventBus, SubWorker: 所有子任务完成后...
+    
+    Listener->>EventBus: post(WaitDispatchMainTaskReduceEvent)
+    EventBus-->>Listener: WaitDispatchMainTaskReduceEventListener.handle()
+    Listener->>Dispatcher: dispatchMainTaskReduce()
+    Dispatcher->>MainWorker: doReduce()
+    
+    activate MainWorker
+    MainWorker-->>MainWorker: 聚合文件
+    MainWorker->>EventBus: post(TaskStageEvent: FINISHED)
+    deactivate MainWorker
+```
+
+
+
 **你的工作范围**：主要在 `ageiport-client` 中实现**业务逻辑**，特别是 `ExportProcessor`，并确保其他基础设施服务（Task Server, Nacos/Eureka, MySQL, MinIO, Redis, RabbitMQ/Kafka等）已正确部署和配置。
 
 ---
@@ -269,6 +335,8 @@ graph TB
 ### 第一步：定义你的“三件套”模型
 
 在 `com.jackasher.ageiport.model` 包下创建新包 `product`，并定义三个核心类：`ProductQuery.java`, `ProductData.java`, `ProductView.java`。
+
+
 
 ### 第二步：实现数据访问层 (Mapper)
 
