@@ -8,6 +8,7 @@ package com.jackasher.ageiport.config.export;
  **/
 
 import com.jackasher.ageiport.constant.AttachmentProcessMode;
+import com.jackasher.ageiport.constant.DeferredBroadcast;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -93,6 +94,10 @@ public class ExportProperties {
      */
     private AttachmentProcessMode attachmentProcessMode = AttachmentProcessMode.SYNC;
 
+    /**
+     * 延迟触发广播策略：http/redis/
+     */
+    private String deferredTriggerStrategy = DeferredBroadcast.HTTP;
 
     /**
      * 内部静态类，用于映射 thread-pool 配置

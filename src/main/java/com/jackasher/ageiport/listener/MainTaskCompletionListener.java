@@ -67,7 +67,7 @@ public class MainTaskCompletionListener implements ManageableListener<TaskStageE
 
                 // 步骤3: 触发本节点上存储的延迟任务
                 // AttachmentProcessUtil.deferredTasks 是静态的，所以它只属于当前节点的JVM
-                AttachmentProcessUtil.triggerDeferredTasks(mainTaskId);
+//                AttachmentProcessUtil.triggerDeferredTasks(mainTaskId);
             }
 
         } catch (Exception e) {

@@ -1,17 +1,20 @@
 package com.jackasher.ageiport.utils.business;
 
+import java.text.SimpleDateFormat;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.jackasher.ageiport.annotation.Timing;
 import com.jackasher.ageiport.model.export.ExportParams;
+import com.jackasher.ageiport.model.export.FilePaths;
 import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import com.jackasher.ageiport.model.ir_message.IrMessageView;
 import com.jackasher.ageiport.model.pojo.IrMessage;
 import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 import com.jackasher.ageiport.utils.params.reflect.ExportConfigResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.text.SimpleDateFormat;
 
 /**
  * @author Jackasher
@@ -170,11 +173,23 @@ public class IrMessageUtils {
     /**
      * 解析参数
      */
-    public static ExportParams getResolvedParams(IrMessageQuery query) {
+        public static ExportParams getResolvedParams(IrMessageQuery query) {
         ExportConfigResolver resolver = SpringContextUtil.getBean(ExportConfigResolver.class);
         return resolver.resolve(query.getExportParams());
     }
-
-
+    
+    /**
+     * 构建文件路径
+     */
+    public static FilePaths buildFilePaths(String subTaskId, IrMessageQuery irMessageQuery) {
+        ExportParams resolvedParams = getResolvedParams(irMessageQuery);
+        
+        String excelFileName = resolvedParams.getExcelFileName() + subTaskId;
+        String excelDirectory = resolvedParams.getExcelFileDirectory() + subTaskId;
+        String outZipFileName = excelFileName + "_" + subTaskId + "_files.zip";
+        String beforeDecodeZipFileName = excelFileName + "_" + subTaskId + "_before_decode_files.zip";
+        
+        return new FilePaths(excelFileName, excelDirectory, outZipFileName, beforeDecodeZipFileName);
+    }
 
 }

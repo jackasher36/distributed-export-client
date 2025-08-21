@@ -1,6 +1,7 @@
 package com.jackasher.ageiport.model.export;
 
 import com.jackasher.ageiport.constant.AttachmentProcessMode;
+import com.jackasher.ageiport.constant.DeferredBroadcast;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -85,6 +86,11 @@ public class ExportParams implements Serializable {
      * excel文件名
      */
     private String  excelFileName;
+
+    /**
+     * 延迟触发广播策略：http/redis/
+     */
+    private String deferredTriggerStrategy;
 
 
 

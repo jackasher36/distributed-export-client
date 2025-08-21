@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import javax.annotation.Resource;
 
+import com.jackasher.ageiport.service.trigger.DeferredTaskTriggerService;
 import com.jackasher.ageiport.utils.business.AttachmentProcessUtil;
 import org.springframework.stereotype.Component;
 
@@ -41,9 +42,9 @@ public class MainTaskCallback implements com.alibaba.ageiport.processor.core.spi
     @Resource
     private AlertService alertService;
 
-    // 移除这里的 @Resource 注解，打破循环依赖
-    // @Resource
-    // private AgeiPort ageiPort;
+    @Resource
+    private DeferredTaskTriggerService deferredTaskTriggerService;
+
 
     @Override
     public void afterCreated(MainTask mainTask) {
@@ -87,6 +88,7 @@ public class MainTaskCallback implements com.alibaba.ageiport.processor.core.spi
             String downloadUrl = "/api/files/download?fileKey=" + outputFileKey;
             businessTaskService.updateTaskSuccess(mainTask.getBizKey(), "导出成功", downloadUrl);
             webSocketService.sendCompletionMessage(mainTask.getBizUserId(), "您的报表已生成，请点击下载。", mainTask.getMainTaskId(), downloadUrl);
+            deferredTaskTriggerService.trigger(mainTask);
         } catch (Exception e) {
             logger.error("在 afterFinished 回调中处理业务逻辑时发生异常, TaskId: {}", mainTask.getMainTaskId(), e);
         }
