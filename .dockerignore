@@ -181,3 +181,5 @@ generated-config/
 # demo 目录下的所有文件
 src/main/java/com/jackasher/ageiport/demo/
 demo/
+
+.idea/
