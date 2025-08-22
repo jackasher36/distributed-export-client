@@ -1,6 +1,6 @@
 // src/main/java/com/jackasher/ageiport/service/callback_service/trigger/DeferredTaskTriggerService.java
 
-package com.jackasher.ageiport.service.trigger;
+package com.jackasher.ageiport.publisher;
 
 import com.alibaba.ageiport.processor.core.model.core.impl.MainTask;
 import com.jackasher.ageiport.config.export.ExportProperties;

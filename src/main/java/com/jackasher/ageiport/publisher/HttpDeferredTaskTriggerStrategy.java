@@ -1,19 +1,18 @@
 // src/main/java/com/jackasher/ageiport/service/callback_service/trigger/HttpDeferredTaskTriggerStrategy.java
 
-package com.jackasher.ageiport.service.trigger;
+package com.jackasher.ageiport.publisher;
 
 import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.alibaba.ageiport.processor.core.model.core.impl.MainTask;
-import com.jackasher.ageiport.controller.monitor.InternalTaskController;
+import com.jackasher.ageiport.listener.InternalTaskController;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,9 +28,6 @@ public class HttpDeferredTaskTriggerStrategy implements DeferredTaskTriggerStrat
     @Resource
     private RestTemplate restTemplate; // 确保已配置RestTemplate Bean
 
-    @Value("${spring.application.name}")
-    private String applicationName;
-
     @Override
     public String getStrategyName() {
         return STRATEGY_NAME;
@@ -43,16 +39,13 @@ public class HttpDeferredTaskTriggerStrategy implements DeferredTaskTriggerStrat
         log.info("[HTTP-Trigger] 开始广播任务完成事件, MainTaskID: {}", mainTaskId);
 
         // 从服务发现获取所有实例
-        List<ServiceInstance> instances = discoveryClient.getInstances(applicationName); // 修正服务名
-        
-        // 调试信息：打印所有实例
-        log.info("[HTTP-Trigger] 查询服务名: ageiport, 发现实例数量: {}", instances.size());
-        for (ServiceInstance instance : instances) {
-            log.info("[HTTP-Trigger] 发现实例: {}", instance);
-        }
-        
+        List<ServiceInstance> instances = discoveryClient.getInstances("ageiport-client"); // 你的服务名
         if (instances.isEmpty()) {
             log.error("[HTTP-Trigger] 无法找到任何服务实例来广播事件!");
+            System.out.println(instances.size());
+            for (ServiceInstance instance : instances) {
+                System.out.println(instance);
+            }
             return;
         }
 

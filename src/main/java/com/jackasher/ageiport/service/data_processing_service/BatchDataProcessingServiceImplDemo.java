@@ -1,19 +1,25 @@
 package com.jackasher.ageiport.service.data_processing_service;
 
-import com.jackasher.ageiport.model.ir_message.IrMessageData;
-import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
-import io.minio.MinioClient;
+import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.util.List;
-import java.util.concurrent.*;
-
+import com.jackasher.ageiport.model.ir_message.IrMessageData;
+import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import static com.jackasher.ageiport.utils.business.IrMessageUtils.getResolvedParams;
+
+import io.minio.MinioClient;
 
 @Service
 public class BatchDataProcessingServiceImplDemo implements BatchDataProcessingService {
@@ -23,7 +29,7 @@ public class BatchDataProcessingServiceImplDemo implements BatchDataProcessingSe
     //    @Resource
     private MinioClient minioClient;
 
-    @Resource
+    @Autowired(required = false)
     @Qualifier("attachmentTaskExecutor")
     private ThreadPoolTaskExecutor attachmentTaskExecutor;
 
@@ -72,16 +78,33 @@ public class BatchDataProcessingServiceImplDemo implements BatchDataProcessingSe
     public CompletableFuture<Void> processDataAsync(List<IrMessageData> messages, String subTaskId, int pageNum, IrMessageQuery irMessageQuery, long timeoutSeconds) {
         log.info("开始异步处理子任务 {} 的批次数据，批次号：{}，超时时间：{}秒", subTaskId, pageNum, timeoutSeconds);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            try {
-                // 在异步线程中执行同步处理逻辑
-                processData(messages, subTaskId, pageNum, irMessageQuery);
-                log.info("子任务 {} 的批次数据异步处理完成", subTaskId);
-            } catch (Exception e) {
-                log.error("子任务 {} 的批次数据异步处理失败: {}", subTaskId, e.getMessage(), e);
-                throw new RuntimeException("异步处理批次数据失败，子任务: " + subTaskId, e);
-            }
-        }, attachmentTaskExecutor);
+        CompletableFuture<Void> future;
+        
+        if (attachmentTaskExecutor != null) {
+            // 使用专用线程池异步处理
+            log.debug("使用专用线程池 attachmentTaskExecutor 进行异步处理");
+            future = CompletableFuture.runAsync(() -> {
+                try {
+                    processData(messages, subTaskId, pageNum, irMessageQuery);
+                    log.info("子任务 {} 的批次数据异步处理完成", subTaskId);
+                } catch (Exception e) {
+                    log.error("子任务 {} 的批次数据异步处理失败: {}", subTaskId, e.getMessage(), e);
+                    throw new RuntimeException("异步处理批次数据失败，子任务: " + subTaskId, e);
+                }
+            }, attachmentTaskExecutor);
+        } else {
+            // 降级到默认线程池
+            log.warn("专用线程池不可用，降级到默认 ForkJoinPool 进行异步处理");
+            future = CompletableFuture.runAsync(() -> {
+                try {
+                    processData(messages, subTaskId, pageNum, irMessageQuery);
+                    log.info("子任务 {} 的批次数据异步处理完成（使用默认线程池）", subTaskId);
+                } catch (Exception e) {
+                    log.error("子任务 {} 的批次数据异步处理失败: {}", subTaskId, e.getMessage(), e);
+                    throw new RuntimeException("异步处理批次数据失败，子任务: " + subTaskId, e);
+                }
+            });
+        }
 
         // Java 8 兼容的超时处理
         return applyTimeout(future, timeoutSeconds, subTaskId);

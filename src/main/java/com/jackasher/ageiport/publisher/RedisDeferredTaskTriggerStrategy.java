@@ -1,9 +1,9 @@
 // src/main/java/com/jackasher/ageiport/service/callback_service/trigger/RedisDeferredTaskTriggerStrategy.java
 
-package com.jackasher.ageiport.service.trigger;
+package com.jackasher.ageiport.publisher;
 
 import com.alibaba.ageiport.processor.core.model.core.impl.MainTask;
-import com.jackasher.ageiport.config.listener.RedisMessageListenerConfig;
+import com.jackasher.ageiport.config.redis.RedisMessageListenerConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;

@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import javax.annotation.Resource;
 
-import com.jackasher.ageiport.service.trigger.DeferredTaskTriggerService;
+import com.jackasher.ageiport.publisher.DeferredTaskTriggerService;
 import com.jackasher.ageiport.utils.business.AttachmentProcessUtil;
 import org.springframework.stereotype.Component;
 

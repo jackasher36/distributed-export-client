@@ -4,13 +4,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import lombok.Data;
 
 /**
  * 线程池配置类
@@ -22,10 +25,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Configuration
 @ConfigurationProperties(prefix = "ageiport.attachment-thread-pool")
-@Data
-public class ThreadPoolConfig {
+@ConditionalOnExpression("'async'.equals('${ageiport.export.attachment-process-mode:}') || 'deferred'.equals('${ageiport.export.attachment-process-mode:}')")@Data
+public class AttachmentPoolConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(ThreadPoolConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(AttachmentPoolConfig.class);
 
     /**
      * 核心线程数，默认为CPU核心数
@@ -56,39 +59,31 @@ public class ThreadPoolConfig {
      * 创建附件处理专用的线程池
      */
     @Bean("attachmentTaskExecutor")
+    @ConditionalOnProperty(prefix = "ageiport.export", name = "attachment-process-mode", havingValue = "deferred")
     public ThreadPoolTaskExecutor attachmentTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        
+
         executor.setCorePoolSize(corePoolSize);
         executor.setMaxPoolSize(maxPoolSize);
         executor.setQueueCapacity(queueCapacity);
         executor.setKeepAliveSeconds(keepAliveSeconds);
         executor.setThreadNamePrefix(threadNamePrefix);
-        
+
         // 设置拒绝策略：当线程池和队列都满时，由调用线程执行
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        
+
         // 设置等待所有任务结束后再关闭线程池
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);
-        
+
         executor.initialize();
-        
-        log.info("附件处理线程池初始化完成 - 核心线程数: {}, 最大线程数: {}, 队列容量: {}", 
+
+        log.info("附件处理线程池初始化完成 - 核心线程数: {}, 最大线程数: {}, 队列容量: {}",
                 corePoolSize, maxPoolSize, queueCapacity);
-        
+
         return executor;
     }
 
-    @Bean("serialAttachmentTaskExecutor")
-    public Executor serialAttachmentTaskExecutor() {
-        log.info("串行附件处理线程池初始化完成。");
-        // Executors.newSingleThreadExecutor() 会创建一个队列无界的单线程池
-        return Executors.newSingleThreadExecutor(r -> {
-            Thread t = new Thread(r, "serial-attachment-executor");
-            t.setDaemon(true); // 设为守护线程
-            return t;
-        });
-    }
+
 
 }

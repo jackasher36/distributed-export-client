@@ -1,6 +1,6 @@
 // src/main/java/com/jackasher/ageiport/config/redis/RedisMessageListenerConfig.java
 
-package com.jackasher.ageiport.config.listener;
+package com.jackasher.ageiport.config.redis;
 
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
