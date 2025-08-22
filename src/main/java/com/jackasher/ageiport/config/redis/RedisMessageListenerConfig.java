@@ -14,7 +14,6 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import com.jackasher.ageiport.listener.RedisDeferredTaskSubscriber;
 
 @Configuration
-@ConditionalOnProperty(prefix = "ageiport.export", name = "attachment-process-mode", havingValue = "deferred")
 public class RedisMessageListenerConfig {
     
     public static final String DEFERRED_TASK_TRIGGER_CHANNEL = "ageiport:deferred_task_trigger";

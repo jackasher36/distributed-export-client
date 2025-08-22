@@ -1,17 +1,29 @@
 server:
-  port: 8775
+  port: 8775 # 应用服务端口
 
 spring:
   application:
-    name: ageiport
+    name: ageiport # 应用名称
   datasource:
-    url: jdbc:mysql://your_mysql_host:3306/your_database_name?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: your_mysql_username
-    password: your_mysql_password
-  
+    # 数据库连接URL，请替换为您的实际数据库地址和数据库名
+    url: jdbc:mysql://YOUR_DB_HOST:3306/YOUR_DB_NAME?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root # 数据库用户名
+    password: YOUR_DB_PASSWORD # 数据库密码，请替换为您的实际密码
+  redis:
+    host: localhost # Redis 服务器地址，请替换为您的实际地址
+    port: 6379      # Redis 端口
+    password:       # Redis 密码 (如果没有则留空，有则替换为您的实际密码)
+    database: 0     # Redis 数据库索引 (默认为0)
+    timeout: 5000ms # 连接超时时间
+  # rabbitmq 配置
+  rabbitmq:
+    host: YOUR_RABBITMQ_HOST # RabbitMQ 服务器地址，请替换为您的实际地址
+    port: 5672
+    username: guest
+    password: guest # RabbitMQ 密码，请替换为您的实际密码
   # Kafka 配置
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: YOUR_KAFKA_HOST:9092 # Kafka 服务器地址，请替换为您的实际地址和端口
     consumer:
       group-id: attachment-processing-group
       auto-offset-reset: earliest
@@ -21,13 +33,10 @@ spring:
       retries: 3
       batch-size: 16384
       compression-type: gzip
-      # 大消息支持
-      buffer-memory: 67108864  # 64MB
-
   cloud:
     nacos:
-      # Nacos Server地址
-      server-addr: your_nacos_host:8848
+      # Nacos Server地址，请替换为您的实际地址和端口
+      server-addr: YOUR_NACOS_HOST:8848
       config:
         # 配置文件后缀
         file-extension: yml
@@ -43,28 +52,36 @@ spring:
     import:
       - optional:nacos:${spring.application.name}.yml
 
-
 ageiport:
   # 文件存储配置 - 支持动态选择存储类型
   file-store:
-    # 存储类型：minio 或 oss
+    # 存储类型：minio 或 oss，根据实际使用的存储服务选择
     type: oss
     # MinIO配置（当type为minio时使用）
     minio:
-      endpoint: http://your_minio_host:9000
-      bucket-name: your_minio_bucket_name
-      access-key: your_minio_access_key
-      secret-key: your_minio_secret_key
+      endpoint: http://YOUR_MINIO_HOST:9000 # MinIO Endpoint，请替换为您的实际地址
+      bucket-name: ageiport-tasks # MinIO Bucket名称
+      access-key: minioadmin # MinIO Access Key
+      secret-key: minioadmin # MinIO Secret Key，请替换为您的实际密钥
     # 阿里云OSS配置（当type为oss时使用）
     oss:
-      endpoint: https://your_oss_endpoint
-      bucket-name: your_oss_bucket_name
-      access-key-id: your_oss_access_key_id
-      access-key-secret: your_oss_access_key_secret
+      endpoint: https://YOUR_OSS_ENDPOINT # OSS Endpoint，例如：oss-cn-chengdu.aliyuncs.com
+      bucket-name: ageiport # OSS Bucket名称
+      access-key-id: YOUR_OSS_ACCESS_KEY_ID # OSS Access Key ID，请替换为您的实际ID
+      access-key-secret: YOUR_OSS_ACCESS_KEY_SECRET # OSS Access Key Secret，请替换为您的实际密钥
 
   # ageiPort server的地址
   taskServerClientOptions:
     port: 9821
-    endpoint: your_ageiport_task_server_host
+    endpoint: YOUR_AGEIPORT_TASK_SERVER_HOST # ageiPort Task Server Endpoint，请替换为您的实际地址
 
-
+  # 导出相关配置
+  export:
+    delete-temp-file: true # 导出完成后是否删除临时文件
+    total-count: 3000      # 导出总行数
+    page-row-number: 1000  # 每页查询行数
+    attachment-process-mode: sync # 附件处理模式：sync(同步) 或 async(异步)
+    deferred-trigger-strategy: redis # 延迟触发策略：redis 或 db
+  attachment-thread-pool:
+    core-pool-size: 2 # 附件处理的核心线程数
+    max-pool-size: 2  # 附件处理的最大线程数
