@@ -1,2 +1,2 @@
-UserCSVExportProcessor=com.jackasher.ageiport.processer.UserCSVExportProcessor
-IrMessageExportProcessor=com.jackasher.ageiport.processer.IrMessageExportProcessor
+UserExportProcessor=com.jackasher.ageiport.processer.impl.user.UserExportProcessor
+IrMessageExportProcessor=com.jackasher.ageiport.processer.impl.ir_message.IrMessageExportProcessor

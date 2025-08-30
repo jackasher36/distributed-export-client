@@ -1,13 +1,21 @@
 package com.jackasher.ageiport.utils.ioc;
 
-import com.jackasher.ageiport.config.export.ExportProperties;
-import com.jackasher.ageiport.mapper.IrMessageMapper;
-import io.minio.MinioClient;
-import lombok.Getter;
+import com.jackasher.ageiport.model.ir_message.IrMessageData;
+import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
+import com.jackasher.ageiport.service.data_processing_service.GenericDataProcessingService;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+
+import com.jackasher.ageiport.config.export.ExportProperties;
+import com.jackasher.ageiport.mapper.IrMessageMapper;
+import com.jackasher.ageiport.processer.impl.ir_message.IrMessageBatchProcessor;
+import com.jackasher.ageiport.processer.impl.ir_message.IrMessageDataAccessor;
+import com.jackasher.ageiport.processer.impl.ir_message.IrMessageDataConverter;
+
+import io.minio.MinioClient;
+import lombok.Getter;
 
 /**
  * Spring上下文工具类，用于在非Spring管理的类中获取Spring Bean
@@ -88,4 +96,42 @@ public class SpringContextUtil implements ApplicationContextAware {
     private static class MinioClientHolder {
         private static final MinioClient INSTANCE = SpringContextUtil.getBean(MinioClient.class);
     }
+
+    // --- IrMessage处理器相关的Bean获取方法 ---
+
+    /**
+     * 获取 IrMessageDataAccessor
+     */
+    public static IrMessageDataAccessor getIrMessageDataAccessor() {
+        return IrMessageDataAccessorHolder.INSTANCE;
+    }
+
+    private static class IrMessageDataAccessorHolder {
+        private static final IrMessageDataAccessor INSTANCE = SpringContextUtil.getBean(IrMessageDataAccessor.class);
+    }
+
+    /**
+     * 获取 IrMessageDataConverter
+     */
+    public static IrMessageDataConverter getIrMessageDataConverter() {
+        return IrMessageDataConverterHolder.INSTANCE;
+    }
+
+    private static class IrMessageDataConverterHolder {
+        private static final IrMessageDataConverter INSTANCE = SpringContextUtil.getBean(IrMessageDataConverter.class);
+    }
+
+    /**
+     * 获取 IrMessageBatchProcessor
+     */
+    public static IrMessageBatchProcessor getIrMessageBatchProcessor() {
+        return IrMessageBatchProcessorHolder.INSTANCE;
+    }
+
+    private static class IrMessageBatchProcessorHolder {
+        private static final IrMessageBatchProcessor INSTANCE = SpringContextUtil.getBean(IrMessageBatchProcessor.class);
+    }
+
+
+
 }

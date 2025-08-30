@@ -1,10 +1,29 @@
 package com.jackasher.ageiport.processer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import com.jackasher.ageiport.service.data_processing_service.GenericDataProcessingService;
+import org.apache.poi.hssf.record.DVALRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.ageiport.processor.core.annotation.ExportSpecification;
 import com.alibaba.ageiport.processor.core.constants.ExecuteType;
 import com.alibaba.ageiport.processor.core.exception.BizException;
 import com.alibaba.ageiport.processor.core.file.excel.ExcelConstants;
-import com.alibaba.ageiport.processor.core.model.api.*;
+import com.alibaba.ageiport.processor.core.model.api.BizColumnHeader;
+import com.alibaba.ageiport.processor.core.model.api.BizColumnHeaders;
+import com.alibaba.ageiport.processor.core.model.api.BizData;
+import com.alibaba.ageiport.processor.core.model.api.BizDataGroup;
+import com.alibaba.ageiport.processor.core.model.api.BizDataItem;
+import com.alibaba.ageiport.processor.core.model.api.BizExportPage;
+import com.alibaba.ageiport.processor.core.model.api.BizUser;
 import com.alibaba.ageiport.processor.core.model.api.impl.BizColumnHeaderImpl;
 import com.alibaba.ageiport.processor.core.model.api.impl.BizColumnHeadersImpl;
 import com.alibaba.ageiport.processor.core.model.api.impl.BizDataGroupImpl;
@@ -19,40 +38,33 @@ import com.alibaba.ageiport.processor.core.utils.HeadersUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.jackasher.ageiport.dispatcher.GenericProcessingDispatcher;
 import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import com.jackasher.ageiport.model.ir_message.IrMessageView;
-import com.jackasher.ageiport.service.data_processing_service.ProgressTrackerService;
-import com.jackasher.ageiport.utils.business.AttachmentProcessUtil;
-import com.jackasher.ageiport.utils.business.IrMessageUtils;
-import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 import com.jackasher.ageiport.model.pojo.IrMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.jackasher.ageiport.utils.business.IrMessageUtils.*;
+import com.jackasher.ageiport.utils.business.IrMessageUtils;
+import static com.jackasher.ageiport.utils.business.IrMessageUtils.convertToIrMessageData;
 import static com.jackasher.ageiport.utils.business.IrMessageUtils.getResolvedParams;
+import static com.jackasher.ageiport.utils.business.IrMessageUtils.irMessageQueryToirMessage;
+import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 
 /**
+ * 已废弃,该类可作为模版, 已抽象为通用导出器, 可处理不同的数据, 参考GenericExportAdapter,
  * IR消息导出处理器,每个要处理的表,都需要实现一个处理器
- *
  * @author Jackasher
  * @version 1.0
  * @since 1.0
  **/
 @ExportSpecification(
-        code = "IrMessageExportProcessor",
-        name = "IrMessageExportProcessor",
+        code = "IrMessageExportProcessorDeprecated",
+        name = "IrMessageExportProcessorDeprecated",
         executeType = ExecuteType.CLUSTER // 指定为集群执行模式
 )
+@Deprecated
 public class IrMessageExportProcessor implements ExportProcessor<IrMessageQuery, IrMessageData, IrMessageView> {
 
     private static final Logger log = LoggerFactory.getLogger(IrMessageExportProcessor.class);
-
-
 
     /**
      * [生命周期-1: 主任务节点]
@@ -244,7 +256,6 @@ public class IrMessageExportProcessor implements ExportProcessor<IrMessageQuery,
             // 转换为IrMessageData
             List<IrMessageData> dataList = new ArrayList<>();
 
-            // 这里的操作其实可以避免,性能提升的话可以直接把查出的数据传递下去
             for (IrMessage irMessage : irMessages) {
                 IrMessageData data = convertToIrMessageData(irMessage);
                 dataList.add(data);
@@ -281,7 +292,8 @@ public class IrMessageExportProcessor implements ExportProcessor<IrMessageQuery,
         // 1. 处理附件（支持多种模式：同步/异步/延迟/跳过）
         try {
             String mainTaskId = context.getMainTask().getMainTaskId();
-            AttachmentProcessUtil.processAttachments(irMessageDataList, subTaskId, subTaskNo, irMessageQuery, mainTaskId);
+            GenericProcessingDispatcher<IrMessageData, IrMessageQuery> dispatcher = new GenericProcessingDispatcher<IrMessageData, IrMessageQuery>(SpringContextUtil.getBean("attachmentProcessingServiceImpl", GenericDataProcessingService.class) );
+            dispatcher.processBatchData(irMessageDataList, subTaskId, subTaskNo, irMessageQuery, mainTaskId);
         } catch (Exception e) {
             // 只记录日志，不中断导出流程
             log.error("子任务 {} 在处理附件时发生错误，但导出将继续。错误: {}", subTaskId, e.getMessage(), e);

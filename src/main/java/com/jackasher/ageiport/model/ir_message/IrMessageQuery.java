@@ -1,6 +1,7 @@
 package com.jackasher.ageiport.model.ir_message;
 
 import com.jackasher.ageiport.model.export.ExportParams;
+import com.jackasher.ageiport.model.export.GenericExportQuery;
 import lombok.Data;
 import lombok.ToString;
 
@@ -15,9 +16,9 @@ import java.util.Date;
  * @since 1.0
  **/
 @Data
-public class IrMessageQuery implements Serializable {
+public class IrMessageQuery implements Serializable, GenericExportQuery {
     private static final long serialVersionUID = 1L;
-    
+
     private String uuid;
     private Date createdTimeStart;
     private Date createdTimeEnd;

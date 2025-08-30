@@ -1,20 +1,19 @@
 package com.jackasher.ageiport.utils.business;
 
-import java.text.SimpleDateFormat;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.jackasher.ageiport.annotation.Timing;
 import com.jackasher.ageiport.model.export.ExportParams;
 import com.jackasher.ageiport.model.export.FilePaths;
+import com.jackasher.ageiport.model.export.GenericExportQuery;
 import com.jackasher.ageiport.model.ir_message.IrMessageData;
 import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
 import com.jackasher.ageiport.model.ir_message.IrMessageView;
 import com.jackasher.ageiport.model.pojo.IrMessage;
 import com.jackasher.ageiport.utils.ioc.SpringContextUtil;
 import com.jackasher.ageiport.utils.params.reflect.ExportConfigResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.text.SimpleDateFormat;
 
 /**
  * @author Jackasher
@@ -27,6 +26,7 @@ public class IrMessageUtils {
     private static final Logger log = LoggerFactory.getLogger(IrMessageUtils.class);
 
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     /**
      * 构建查询条件
      */
@@ -37,7 +37,7 @@ public class IrMessageUtils {
     /**
      * 构建查询条件，支持控制是否追加排序（用于 COUNT 查询时禁用 ORDER BY，兼容 StarRocks/分析型数据库限制）
      *
-     * @param query 查询参数
+     * @param query        查询参数
      * @param includeOrder 是否包含排序（true: 追加按创建时间倒序；false: 不追加排序）
      */
     public static LambdaQueryWrapper<IrMessage> irMessageQueryToirMessage(IrMessageQuery query, boolean includeOrder) {
@@ -173,22 +173,22 @@ public class IrMessageUtils {
     /**
      * 解析参数
      */
-        public static ExportParams getResolvedParams(IrMessageQuery query) {
+    public static ExportParams getResolvedParams(GenericExportQuery query) {
         ExportConfigResolver resolver = SpringContextUtil.getBean(ExportConfigResolver.class);
         return resolver.resolve(query.getExportParams());
     }
-    
+
     /**
      * 构建文件路径
      */
     public static FilePaths buildFilePaths(String subTaskId, IrMessageQuery irMessageQuery) {
         ExportParams resolvedParams = getResolvedParams(irMessageQuery);
-        
+
         String excelFileName = resolvedParams.getExcelFileName() + subTaskId;
         String excelDirectory = resolvedParams.getExcelFileDirectory() + subTaskId;
         String outZipFileName = excelFileName + "_" + subTaskId + "_files.zip";
         String beforeDecodeZipFileName = excelFileName + "_" + subTaskId + "_before_decode_files.zip";
-        
+
         return new FilePaths(excelFileName, excelDirectory, outZipFileName, beforeDecodeZipFileName);
     }
 

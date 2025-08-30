@@ -7,7 +7,7 @@ import java.io.Serializable;
  * 
  * @author jackasher
  */
-public enum AttachmentProcessMode implements Serializable {
+public enum BatchDataProcessMode implements Serializable {
     
     /**
      * 同步处理 - 阻塞当前线程

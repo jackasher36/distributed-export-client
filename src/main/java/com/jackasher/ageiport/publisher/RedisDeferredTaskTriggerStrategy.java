@@ -2,13 +2,15 @@
 
 package com.jackasher.ageiport.publisher;
 
-import com.alibaba.ageiport.processor.core.model.core.impl.MainTask;
-import com.jackasher.ageiport.config.redis.RedisMessageListenerConfig;
-import lombok.extern.slf4j.Slf4j;
+import javax.annotation.Resource;
+
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import com.alibaba.ageiport.processor.core.model.core.impl.MainTask;
+import com.jackasher.ageiport.config.redis.RedisMessageListenerConfig;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -18,6 +20,9 @@ public class RedisDeferredTaskTriggerStrategy implements DeferredTaskTriggerStra
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private HttpDeferredTaskTriggerStrategy httpDeferredTaskTriggerStrategy;
 
     @Override
     public String getStrategyName() {
@@ -33,7 +38,10 @@ public class RedisDeferredTaskTriggerStrategy implements DeferredTaskTriggerStra
             log.info("[Redis-Trigger] 成功发布指令, Channel: {}", RedisMessageListenerConfig.DEFERRED_TASK_TRIGGER_CHANNEL);
         } catch (Exception e) {
             log.error("[Redis-Trigger] 发布指令到Redis失败. MainTaskID: {}", mainTaskId, e);
-            // 生产环境需要加入失败处理机制
+            // 降级到http方案
+            log.info("[Redis-Trigger] 降级到HTTP方案");
+            httpDeferredTaskTriggerStrategy.trigger(mainTask);
         }
     }
+
 }

@@ -1,7 +1,8 @@
 // src/main/java/com/jackasher/ageiport/service/mq/MqConsumerService.java
 package com.jackasher.ageiport.mq.rabbitmq;
 
-import com.jackasher.ageiport.service.data_processing_service.BatchDataProcessingService;
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -9,7 +10,10 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import com.jackasher.ageiport.model.dto.ProcessContext;
+import com.jackasher.ageiport.model.ir_message.IrMessageData;
+import com.jackasher.ageiport.model.ir_message.IrMessageQuery;
+import com.jackasher.ageiport.service.data_processing_service.GenericDataProcessingService;
 
 @Component
 @RabbitListener(queues = "attachment_process_queue") // 监听指定的队列
@@ -19,19 +23,19 @@ public class MqConsumerService {
     private static final Logger log = LoggerFactory.getLogger(MqConsumerService.class);
 
     @Resource(name = "attachmentProcessingServiceImpl")
-    private BatchDataProcessingService batchDataProcessingService;
+    private GenericDataProcessingService<IrMessageData, IrMessageQuery> batchDataProcessingService;
 
     @RabbitHandler
-    public void process(AttachmentTaskMessage message) {
-        String subTaskId = message.getSubTaskId();
+    public void process(ProcessContext<IrMessageData, IrMessageQuery> message) {
+        String subTaskId = message.subTaskId;
         log.info("从MQ接收到附件处理任务，SubTaskID: {}", subTaskId);
         try {
             // 调用核心业务逻辑执行附件处理
             batchDataProcessingService.processData(
-                    message.getMessages(),
+                    message.messages,
                     subTaskId,
-                    message.getSubTaskNo(),
-                    message.getQuery()
+                    message.subTaskNo,
+                    message.query
             );
             log.info("成功处理了来自MQ的附件任务，SubTaskID: {}", subTaskId);
         } catch (Exception e) {

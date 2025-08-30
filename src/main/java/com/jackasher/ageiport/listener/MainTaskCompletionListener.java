@@ -1,6 +1,8 @@
 // src/main/java/com/jackasher/ageiport/listener/MainTaskCompletionListener.java
 package com.jackasher.ageiport.listener;
 
+import org.springframework.stereotype.Component;
+
 import com.alibaba.ageiport.common.logger.Logger;
 import com.alibaba.ageiport.common.logger.LoggerFactory;
 import com.alibaba.ageiport.processor.core.AgeiPort;
@@ -12,9 +14,10 @@ import com.alibaba.ageiport.processor.core.spi.task.monitor.TaskStageEvent;
 import com.alibaba.ageiport.processor.core.spi.task.selector.TaskSpiSelector;
 import com.alibaba.ageiport.processor.core.spi.task.stage.MainTaskStageProvider;
 import com.alibaba.ageiport.processor.core.spi.task.stage.Stage;
-import com.jackasher.ageiport.utils.business.AttachmentProcessUtil; // 确保路径正确
-import org.springframework.stereotype.Component;
 
+/**
+ * TaskStageEvent事件监听器,只有主节点可以监听到
+ */
 @Component("mainTaskCompletionListener") // 注册为 Spring Bean
 public class MainTaskCompletionListener implements ManageableListener<TaskStageEvent> {
 
@@ -66,8 +69,8 @@ public class MainTaskCompletionListener implements ManageableListener<TaskStageE
                 log.info("监听到主任务 {} 完成事件！准备触发本节点上的延迟任务...", mainTaskId);
 
                 // 步骤3: 触发本节点上存储的延迟任务
-                // AttachmentProcessUtil.deferredTasks 是静态的，所以它只属于当前节点的JVM
-//                AttachmentProcessUtil.triggerDeferredTasks(mainTaskId);
+                // GenericProcessingDispatcher.deferredTasks 是静态的，所以它只属于当前节点的JVM
+//                GenericProcessingDispatcher.triggerDeferredTasks(mainTaskId);
             }
 
         } catch (Exception e) {

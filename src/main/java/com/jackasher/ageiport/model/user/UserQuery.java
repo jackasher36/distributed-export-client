@@ -1,50 +1,36 @@
 package com.jackasher.ageiport.model.user;
 
+import java.io.Serializable;
+import java.util.Date;
 
-public class UserQuery {
+import com.jackasher.ageiport.model.export.ExportParams;
+
+import com.jackasher.ageiport.model.export.GenericExportQuery;
+import lombok.Data;
+
+/**
+ * 用户导出查询条件
+ * 展示如何为其他数据类型实现通用导出框架
+ * 
+ * @author Jackasher
+ * @version 1.0
+ * @since 1.0
+ */
+@Data
+public class UserQuery implements Serializable, GenericExportQuery {
+    private static final long serialVersionUID = 1L;
+    
     private String username;
-    private Integer userStatus;
-    private Integer userRole;
     private String email;
-    private Integer totalCount = 1000;
+    private String department;
+    private Date createdTimeStart;
+    private Date createdTimeEnd;
+    private Integer status; // 0-禁用, 1-启用
 
-    public String getUsername() {
-        return username;
-    }
+    // 导出参数
+    private ExportParams exportParams;
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public Integer getUserStatus() {
-        return userStatus;
-    }
-
-    public void setUserStatus(Integer userStatus) {
-        this.userStatus = userStatus;
-    }
-
-    public Integer getUserRole() {
-        return userRole;
-    }
-
-    public void setUserRole(Integer userRole) {
-        this.userRole = userRole;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Integer getTotalCount() {
-        return totalCount;
-    }
-
-    public void setTotalCount(Integer totalCount) {
-        this.totalCount = totalCount;
+    public UserQuery() {
+        this.exportParams = new ExportParams();
     }
 }

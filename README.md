@@ -349,12 +349,12 @@ sequenceDiagram
            "sheetRowNumber": 100000,
            "pageRowNumber": 10000,
            "processAttachments": true,
-           "attachmentProcessMode": "ASYNC" 
+           "batchDataProcessMode": "ASYNC" 
          }
        }'
    ```
 
-   -   `attachmentProcessMode`: 可以尝试 `ASYNC`, `KAFKA`, `DEFERRED` 等不同值来体验不同的后处理模式。
+   -   `batchDataProcessMode`: 可以尝试 `ASYNC`, `KAFKA`, `DEFERRED` 等不同值来体验不同的后处理模式。
 
 6. **监控进度**
    在收到包含 `mainTaskId` 的响应后，立即开始轮询进度接口：

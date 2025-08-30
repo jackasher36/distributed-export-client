@@ -2,16 +2,18 @@
 
 package com.jackasher.ageiport.publisher;
 
-import com.alibaba.ageiport.processor.core.model.core.impl.MainTask;
-import com.jackasher.ageiport.config.export.ExportProperties;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.ageiport.processor.core.model.core.impl.MainTask;
+import com.jackasher.ageiport.config.export.ExportProperties;
 
 @Service
 public class DeferredTaskTriggerService {
@@ -23,7 +25,6 @@ public class DeferredTaskTriggerService {
     ExportProperties exportProperties;
 
     private final Map<String, DeferredTaskTriggerStrategy> strategies;
-    private DeferredTaskTriggerStrategy selectedStrategy;
 
     // 构造函数注入所有策略实现
     public DeferredTaskTriggerService(List<DeferredTaskTriggerStrategy> strategyList) {
@@ -31,16 +32,18 @@ public class DeferredTaskTriggerService {
                 .collect(Collectors.toMap(DeferredTaskTriggerStrategy::getStrategyName, Function.identity()));
     }
 
-    @PostConstruct
-    public void init() {
-        configuredStrategy = exportProperties.getDeferredTriggerStrategy();
-        this.selectedStrategy = strategies.get(configuredStrategy);
-        if (this.selectedStrategy == null) {
-            throw new IllegalStateException("未找到配置的延迟任务触发策略: " + configuredStrategy);
-        }
-    }
-
     public void trigger(MainTask mainTask) {
-        selectedStrategy.trigger(mainTask);
+        // 每次触发时动态获取当前配置
+        String currentStrategy = exportProperties.getDeferredTriggerStrategy();
+        System.out.println("【延迟触发策略】当前配置策略: " + currentStrategy);
+        
+        DeferredTaskTriggerStrategy strategy = strategies.get(currentStrategy);
+        if (strategy == null) {
+            System.out.println("【延迟触发策略】未找到策略 " + currentStrategy + "，回退到http策略");
+            strategy = strategies.get("http");
+        }
+        
+        System.out.println("【延迟触发策略】使用策略: " + strategy.getStrategyName());
+        strategy.trigger(mainTask);
     }
 }

@@ -1,7 +1,6 @@
 package com.jackasher.ageiport.model.export;
 
-import com.jackasher.ageiport.constant.AttachmentProcessMode;
-import com.jackasher.ageiport.constant.DeferredBroadcast;
+import com.jackasher.ageiport.constant.BatchDataProcessMode;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -75,7 +74,7 @@ public class ExportParams implements Serializable {
     /**
      * 附件处理模式：SYNC/ASYNC/DEFERRED/NONE
      */
-    private AttachmentProcessMode attachmentProcessMode;
+    private BatchDataProcessMode batchDataProcessMode;
 
     /**
      * excel文件保存目录

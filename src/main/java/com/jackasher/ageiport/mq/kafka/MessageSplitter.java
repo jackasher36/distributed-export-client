@@ -1,13 +1,15 @@
 package com.jackasher.ageiport.mq.kafka;
 
-import com.jackasher.ageiport.model.ir_message.IrMessageData;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jackasher.ageiport.model.dto.ProcessContext;
+import com.jackasher.ageiport.model.export.GenericExportQuery;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * 消息分片器 - 用于处理大消息
+ * 消息分片器 - 用于处理大消息（通用版本）
  * @author Jackasher
  */
 @Slf4j
@@ -17,30 +19,30 @@ public class MessageSplitter {
     private static final int MAX_RECORDS_PER_CHUNK = 1000;
     
     /**
-     * 将大的附件任务消息分片为多个较小的消息
+     * 将大的任务消息分片为多个较小的消息
      * @param originalMessage 原始消息
      * @return 分片后的消息列表
      */
-    public static List<AttachmentTaskMessage> splitMessage(AttachmentTaskMessage originalMessage) {
-        List<AttachmentTaskMessage> chunks = new ArrayList<>();
+    public static <DATA, QUERY extends GenericExportQuery> List<ProcessContext<DATA, QUERY>> splitMessage(ProcessContext<DATA, QUERY> originalMessage) {
+        List<ProcessContext<DATA, QUERY>> chunks = new ArrayList<>();
         
-        if (originalMessage.getMessages() == null || originalMessage.getMessages().isEmpty()) {
-            log.warn("消息为空，无需分片，SubTaskID: {}", originalMessage.getSubTaskId());
+        if (originalMessage.messages == null || originalMessage.messages.isEmpty()) {
+            log.warn("消息为空，无需分片，SubTaskID: {}", originalMessage.subTaskId);
             chunks.add(originalMessage);
             return chunks;
         }
         
-        List<IrMessageData> allMessages = originalMessage.getMessages();
+        List<DATA> allMessages = originalMessage.messages;
         int totalSize = allMessages.size();
         
         // 如果消息数量较小，不需要分片
         if (totalSize <= MAX_RECORDS_PER_CHUNK) {
-            log.debug("消息数量较小({})，无需分片，SubTaskID: {}", totalSize, originalMessage.getSubTaskId());
+            log.debug("消息数量较小({})，无需分片，SubTaskID: {}", totalSize, originalMessage.subTaskId);
             chunks.add(originalMessage);
             return chunks;
         }
         
-        log.info("开始分片处理，总记录数: {}, 子任务ID: {}", totalSize, originalMessage.getSubTaskId());
+        log.info("开始分片处理，总记录数: {}, 子任务ID: {}", totalSize, originalMessage.subTaskId);
         
         // 计算分片数量
         int chunkCount = (totalSize + MAX_RECORDS_PER_CHUNK - 1) / MAX_RECORDS_PER_CHUNK;
@@ -50,24 +52,24 @@ public class MessageSplitter {
             int endIndex = Math.min(startIndex + MAX_RECORDS_PER_CHUNK, totalSize);
             
             // 创建分片消息
-            List<IrMessageData> chunkMessages = allMessages.subList(startIndex, endIndex);
+            List<DATA> chunkMessages = allMessages.subList(startIndex, endIndex);
             
-            AttachmentTaskMessage chunkMessage = new AttachmentTaskMessage(
+            ProcessContext<DATA, QUERY> chunkMessage = new ProcessContext<>(
                 chunkMessages,
-                originalMessage.getSubTaskId() + "_chunk_" + (i + 1), // 添加分片标识
-                originalMessage.getSubTaskNo(),
-                originalMessage.getQuery(),
-                originalMessage.getMainTaskId()
+                originalMessage.subTaskId + "_chunk_" + (i + 1), // 添加分片标识
+                originalMessage.subTaskNo,
+                originalMessage.query,
+                originalMessage.mainTaskId
             );
             
             chunks.add(chunkMessage);
             
             log.debug("创建分片 {}/{}, 记录数: {}, 分片ID: {}", 
-                i + 1, chunkCount, chunkMessages.size(), chunkMessage.getSubTaskId());
+                i + 1, chunkCount, chunkMessages.size(), chunkMessage.subTaskId);
         }
         
         log.info("分片完成，总分片数: {}, 原始记录数: {}, SubTaskID: {}", 
-            chunks.size(), totalSize, originalMessage.getSubTaskId());
+            chunks.size(), totalSize, originalMessage.subTaskId);
         
         return chunks;
     }
@@ -77,13 +79,13 @@ public class MessageSplitter {
      * @param message 消息
      * @return 估算的字节大小
      */
-    public static long estimateMessageSize(AttachmentTaskMessage message) {
-        if (message.getMessages() == null) {
+    public static <DATA, QUERY extends GenericExportQuery> long estimateMessageSize(ProcessContext<DATA, QUERY> message) {
+        if (message.messages == null) {
             return 1000; // 基础开销
         }
         
         // 粗略估算：每条记录约 500-1000 字节（根据实际数据调整）
-        int recordCount = message.getMessages().size();
+        int recordCount = message.messages.size();
         long estimatedSize = recordCount * 800L; // 平均每条记录 800 字节
         
         // 加上基础开销（JSON 序列化、元数据等）
@@ -98,13 +100,13 @@ public class MessageSplitter {
      * @param maxSizeBytes 最大大小（字节）
      * @return true 如果需要分片
      */
-    public static boolean needsSplit(AttachmentTaskMessage message, long maxSizeBytes) {
+    public static <DATA, QUERY extends GenericExportQuery> boolean needsSplit(ProcessContext<DATA, QUERY> message, long maxSizeBytes) {
         long estimatedSize = estimateMessageSize(message);
         boolean needsSplit = estimatedSize > maxSizeBytes;
         
         if (needsSplit) {
             log.info("消息需要分片，估算大小: {} bytes, 最大限制: {} bytes, SubTaskID: {}", 
-                estimatedSize, maxSizeBytes, message.getSubTaskId());
+                estimatedSize, maxSizeBytes, message.subTaskId);
         }
         
         return needsSplit;

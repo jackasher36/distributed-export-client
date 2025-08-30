@@ -7,12 +7,16 @@ package com.jackasher.ageiport.config.export;
  * @since 1.0
  **/
 
-import com.jackasher.ageiport.constant.AttachmentProcessMode;
-import com.jackasher.ageiport.constant.DeferredBroadcast;
-import lombok.Data;
+import javax.annotation.PostConstruct;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
+
+import com.jackasher.ageiport.constant.BatchDataProcessMode;
+import com.jackasher.ageiport.constant.DeferredBroadcast;
+
+import lombok.Data;
 
 /**
  * 映射 application.yml 中 ageiport.export 相关配置的类
@@ -92,12 +96,28 @@ public class ExportProperties {
     /**
      * 附件处理模式：SYNC/ASYNC/DEFERRED/NONE
      */
-    private AttachmentProcessMode attachmentProcessMode = AttachmentProcessMode.SYNC;
+    private BatchDataProcessMode batchDataProcessMode = BatchDataProcessMode.SYNC;
+
 
     /**
      * 延迟触发广播策略：http/redis/
      */
     private String deferredTriggerStrategy = DeferredBroadcast.HTTP;
+    
+    /**
+     * 启动后检查配置
+     */
+    @PostConstruct
+    public void checkConfig() {
+        System.out.println("====================");
+        System.out.println("【ExportProperties 配置检查】");
+        System.out.println("batchDataProcessMode: " + this.batchDataProcessMode);
+        System.out.println("deferredTriggerStrategy: " + this.deferredTriggerStrategy);
+        System.out.println("deleteTempFile: " + this.deleteTempFile);
+        System.out.println("totalCount: " + this.totalCount);
+        System.out.println("pageRowNumber: " + this.pageRowNumber);
+        System.out.println("====================");
+    }
 
     /**
      * 内部静态类，用于映射 thread-pool 配置

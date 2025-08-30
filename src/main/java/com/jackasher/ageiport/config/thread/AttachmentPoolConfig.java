@@ -25,7 +25,7 @@ import lombok.Data;
  */
 @Configuration
 @ConfigurationProperties(prefix = "ageiport.attachment-thread-pool")
-@ConditionalOnExpression("'async'.equals('${ageiport.export.attachment-process-mode:}') || 'deferred'.equals('${ageiport.export.attachment-process-mode:}')")@Data
+@ConditionalOnExpression("'async'.equals('${ageiport.export.batch-data-process-mode:}') || 'deferred'.equals('${ageiport.export.batch-data-process-mode:}')")@Data
 public class AttachmentPoolConfig {
 
     private static final Logger log = LoggerFactory.getLogger(AttachmentPoolConfig.class);

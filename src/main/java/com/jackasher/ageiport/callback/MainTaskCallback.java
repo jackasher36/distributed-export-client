@@ -5,8 +5,6 @@ import java.util.HashMap;
 
 import javax.annotation.Resource;
 
-import com.jackasher.ageiport.publisher.DeferredTaskTriggerService;
-import com.jackasher.ageiport.utils.business.AttachmentProcessUtil;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.ageiport.common.feature.FeatureUtils;
@@ -18,6 +16,8 @@ import com.alibaba.ageiport.processor.core.AgeiPort;
 import com.alibaba.ageiport.processor.core.constants.MainTaskFeatureKeys;
 import com.alibaba.ageiport.processor.core.model.core.impl.MainTask;
 import com.jackasher.ageiport.constant.MainTaskCallbackConstant;
+import com.jackasher.ageiport.dispatcher.GenericProcessingDispatcher;
+import com.jackasher.ageiport.publisher.DeferredTaskTriggerService;
 import com.jackasher.ageiport.service.callback_service.AlertService;
 import com.jackasher.ageiport.service.callback_service.BusinessTaskService;
 import com.jackasher.ageiport.service.callback_service.WebSocketService;
@@ -72,7 +72,7 @@ public class MainTaskCallback implements com.alibaba.ageiport.processor.core.spi
         logger.info("--- [CALLBACK] 任务成功完成 afterFinished: {}", mainTask.getMainTaskId());
         try {
             // 触发延迟处理的附件任务
-            AttachmentProcessUtil.triggerDeferredTasks(mainTask.getMainTaskId());
+            GenericProcessingDispatcher.triggerDeferredTasks(mainTask.getMainTaskId());
             
             String feature = mainTask.getFeature();
             String outputFileKey = FeatureUtils.getFeature(feature, MainTaskFeatureKeys.OUTPUT_FILE_KEY);

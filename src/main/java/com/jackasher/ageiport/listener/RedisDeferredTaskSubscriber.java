@@ -2,17 +2,22 @@
 
 package com.jackasher.ageiport.listener;
 
-import com.jackasher.ageiport.utils.business.AttachmentProcessUtil;
-import com.jackasher.ageiport.utils.network.NetworkUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import com.jackasher.ageiport.dispatcher.GenericProcessingDispatcher;
+import com.jackasher.ageiport.utils.network.NetworkUtils;
+
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Redis 订阅者,接受主节点的信号,并触发延迟任务
+ */
 @Component
 @Slf4j
 public class RedisDeferredTaskSubscriber {
@@ -27,7 +32,7 @@ public class RedisDeferredTaskSubscriber {
         
         // 使用单线程执行器来保证本节点内任务的串行执行
         ((ExecutorService) serialExecutor).submit(() -> {
-            AttachmentProcessUtil.triggerDeferredTasksSerially(mainTaskId, (ExecutorService) serialExecutor);
+            GenericProcessingDispatcher.triggerDeferredTasksSerially(mainTaskId, (ExecutorService) serialExecutor);
         });
     }
 }
